@@ -1,7 +1,7 @@
 use chrono::{Local, DateTime};
 use crate::core::domain::entities::value_object::ValueObject;
 
-#[derive(Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct DateValueObject {
     value: DateTime<Local>
 }

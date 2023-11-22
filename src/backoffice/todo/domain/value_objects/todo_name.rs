@@ -1,13 +1,16 @@
 use crate::core::domain::entities::value_object::ValueObject;
 
 #[derive(Clone)]
-pub struct StringValueObject {
+pub struct TodoName {
     value: String
 }
 
-impl ValueObject<String> for StringValueObject {
+impl ValueObject<String> for TodoName {
     fn new(value: String) -> Self {
-        Self { value }
+        if value.len() > 500 {
+            panic!("The name exceeds the maximum length of 500 characters.")
+        }
+        TodoName { value }
     }
 
     fn value(&self) -> String {

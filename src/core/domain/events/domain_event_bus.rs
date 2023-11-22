@@ -1,9 +1,10 @@
+use async_trait::async_trait;
 use crate::core::domain::events::domain_event::DomainEvent;
 use crate::core::domain::events::domain_event_subscriber::DomainEventSubscriber;
 
-pub trait DomainEventBus{
-    fn new() -> Self;
-    fn publish(&mut self, domain_events: Vec<DomainEvent>);
-    fn add_subscriber(&mut self, subscriber: Box<dyn DomainEventSubscriber>);
-    fn start(&self);
+#[async_trait]
+pub trait DomainEventBus: Send + Sync {
+    async fn publish(&self, domain_events: Vec<DomainEvent>);
+    async fn add_subscriber(&self, subscriber: Box<dyn DomainEventSubscriber + Send>);
+    async fn start(&self);
 }

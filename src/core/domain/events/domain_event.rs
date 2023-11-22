@@ -5,11 +5,17 @@ use crate::core::domain::entities::{
     date_value_object::DateValueObject,
 };
 
+pub trait DomainEvent2 {
+    fn aggregate_id(&self) -> StringValueObject;
+    fn event_name(&self) -> StringValueObject;
+    fn occurring_time(&self) -> DateValueObject;
+}
+
 #[derive(Clone)]
 pub struct DomainEvent {
-    aggregate_id: StringValueObject,
-    event_name: StringValueObject,
-    occurring_time: DateValueObject,
+    pub aggregate_id: StringValueObject,
+    pub event_name: StringValueObject,
+    pub occurring_time: DateValueObject,
 }
 
 impl DomainEvent {
