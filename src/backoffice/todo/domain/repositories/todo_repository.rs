@@ -10,12 +10,12 @@ use crate::core::domain::{
 };
 
 pub struct TodoCriteria {
-    pub id: StringValueObject
+    pub id: StringValueObject,
 }
 
 #[derive(Debug)]
 pub struct TodoRepositoryError {
-    pub msg: String
+    pub msg: String,
 }
 
 impl fmt::Display for TodoRepositoryError {
@@ -28,7 +28,9 @@ impl Error for TodoRepositoryError {}
 
 #[async_trait]
 pub trait TodoRepository: Sync {
-  async fn save(&self, todo: &Todo) -> Result<(), TodoRepositoryError>;
-  async fn delete(&self, criteria: Criteria) -> Result<u32, TodoRepositoryError>;
-  async fn generate_id(&self) -> Result<String, TodoRepositoryError>;
+    async fn generate_id(&self) -> Result<String, TodoRepositoryError>;
+    async fn find(&self, criteria: Option<Criteria>) -> Result<Vec<Todo>, TodoRepositoryError>;
+    async fn get_by_id(&self, id: &StringValueObject) -> Result<Option<Todo>, TodoRepositoryError>;
+    async fn save(&self, todo: &Todo) -> Result<(), TodoRepositoryError>;
+    async fn delete(&self, criteria: Criteria) -> Result<u32, TodoRepositoryError>;
 }

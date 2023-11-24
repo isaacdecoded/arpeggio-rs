@@ -6,27 +6,14 @@ use crate::{
             use_case_input_port::UseCaseInputPort,
             use_case_output_port::UseCaseOutputPort,
         },
-        domain::{
-            entities::{
-                entity::Newable,
-                value_object::ValueObject,
-                string_value_object::StringValueObject,
-                aggregate_root::AggregateRoot
-            },
-            repositories::criteria::{
-                Criteria,
-                Filter,
-                FilterOperator,
-                FilterValue,
-            },
-        }
+        domain::repositories::criteria::{
+            Criteria,
+            Filter,
+            FilterOperator,
+            FilterValue,
+        },
     },
-    backoffice::todo::domain::{
-        entities::todo::Todo,
-        repositories::todo_repository::TodoRepository,
-        value_objects::todo_name::TodoName,
-        entities::todo::NewTodo,
-    },
+    backoffice::todo::domain::repositories::todo_repository::TodoRepository,
 };
 
 pub struct DeleteTodoInputData {

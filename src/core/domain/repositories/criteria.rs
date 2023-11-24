@@ -35,7 +35,6 @@ pub struct Filter {
 
 pub struct Criteria {
     pub filters: Vec<Filter>,
-    pub selection: Option<String>,
     pub limit: Option<u16>,
     pub offset: Option<u16>,
 }
@@ -43,13 +42,11 @@ pub struct Criteria {
 impl Criteria {
     pub fn new(
         filters: Vec<Filter>,
-        selection: Option<String>,
         limit: Option<u16>,
         offset: Option<u16>,
     ) -> Self {
         Self {
             filters,
-            selection,
             limit,
             offset,
         }
@@ -58,7 +55,6 @@ impl Criteria {
     pub fn new_with_filters_only(filters: Vec<Filter>) -> Self {
         Self {
             filters,
-            selection: None,
             limit: None,
             offset: None,
         }
@@ -73,7 +69,7 @@ fn a() {
             s: ManuallyDrop::new("Isaac".to_string())
         },
     };
-    let c = Criteria::new(vec![f], None, None, None);
+    let c = Criteria::new(vec![f], None, None);
     for filter in c.filters {
         unsafe {
             match filter.value {

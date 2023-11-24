@@ -5,6 +5,7 @@ use crate::core::domain::entities::{
             Entity,
             Newable,
             Updatable,
+            Recreable,
         },
         string_value_object::StringValueObject,
         value_object::ValueObject,
@@ -18,12 +19,19 @@ pub struct NewTodo {
 }
 
 pub struct UpdateTodo {
-    name: TodoName,
+    pub name: TodoName,
+}
+
+pub struct RecreateTodo {
+    pub id: StringValueObject,
+    pub name: TodoName,
+    pub created_at: DateValueObject,
+    pub updated_at: Option<DateValueObject>,
 }
 
 pub struct Todo {
     id: StringValueObject,
-    pub name: TodoName,
+    name: TodoName,
     created_at: DateValueObject,
     updated_at: Option<DateValueObject>,
     domain_events: Vec<DomainEvent>
@@ -99,5 +107,17 @@ impl Updatable<UpdateTodo> for Todo {
     fn update(&mut self, todo: UpdateTodo) {
         self.name = todo.name;
         self.updated_at = Some(DateValueObject::new(Local::now()));
+    }
+}
+
+impl Recreable<RecreateTodo> for Todo {
+    fn recreate(todo: RecreateTodo) -> Self {
+        Self {
+            id: todo.id,
+            name: todo.name,
+            created_at: todo.created_at,
+            updated_at: todo.updated_at,
+            domain_events: Vec::new(),
+        }
     }
 }

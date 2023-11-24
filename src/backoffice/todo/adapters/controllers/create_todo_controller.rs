@@ -1,16 +1,19 @@
 use async_trait::async_trait;
 use crate::{
-    backoffice::todo::application::create_todo_use_case::{CreateTodoUseCase, CreateTodoInputData},
+    backoffice::todo::application::create_todo_use_case::{
+        CreateTodoUseCase,
+        CreateTodoInputData,
+    },
     core::adapters::controller::Controller,
     core::application::use_case_input_port::UseCaseInputPort,
 };
 
 pub struct CreateTodoRequestModel {
-    pub name: String
+    pub name: String,
 }
 
 pub struct CreateTodoController<'a> {
-    use_case: CreateTodoUseCase<'a>
+    use_case: CreateTodoUseCase<'a>,
 }
 
 impl<'a> CreateTodoController<'a> {
@@ -22,10 +25,8 @@ impl<'a> CreateTodoController<'a> {
 #[async_trait]
 impl<'a> Controller<CreateTodoRequestModel> for CreateTodoController<'a> {
     async fn execute(&self, request_model: CreateTodoRequestModel) {
-        let name = request_model.name;
-        // assert type(name) is str
         self.use_case.interact(CreateTodoInputData {
-            name,
+            name: request_model.name,
         }).await;
     }
 }

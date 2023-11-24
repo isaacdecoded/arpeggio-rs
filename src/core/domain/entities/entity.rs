@@ -11,6 +11,10 @@ pub trait Updatable<Props> {
     fn update(&mut self, props: Props);
 }
 
+pub trait Recreable<Props> {
+    fn recreate(props: Props) -> Self;
+}
+
 pub trait Entity {
     type Id: ValueObject<String>;
 
