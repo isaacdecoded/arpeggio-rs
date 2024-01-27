@@ -10,9 +10,9 @@ use crate::{
                 entity::Newable,
                 value_object::ValueObject,
                 string_value_object::StringValueObject,
-                aggregate_root::AggregateRoot
+                aggregate_root::AggregateRoot,
             },
-            events::domain_event_bus::DomainEventBus
+            events::domain_event_bus::DomainEventBus,
         },
     },
     backoffice::todo::domain::{
@@ -24,24 +24,24 @@ use crate::{
 };
 
 pub struct CreateTodoInputData {
-  pub name: String
+    pub name: String,
 }
 
 pub struct CreateTodoOutputData {
-    pub id: String
+    pub id: String,
 }
 
 pub struct CreateTodoUseCase<'a> {
     repository: &'a dyn TodoRepository,
-    domain_event_bus: &'a dyn DomainEventBus,
+    domain_event_bus: &'a dyn DomainEventBus<'a>,
     output_port: Box<dyn UseCaseOutputPort<CreateTodoOutputData>>,
 }
 
 impl<'a> CreateTodoUseCase<'a> {
     pub fn new(
         repository: &'a dyn TodoRepository,
-        domain_event_bus: &'a dyn DomainEventBus,
-        output_port: Box<dyn UseCaseOutputPort<CreateTodoOutputData>>,
+        domain_event_bus: &'a dyn DomainEventBus<'a>,
+        output_port: Box<dyn UseCaseOutputPort<CreateTodoOutputData>>
     ) -> Self {
         Self {
             repository,
@@ -81,15 +81,15 @@ impl<'a> UseCaseInputPort<CreateTodoInputData> for CreateTodoUseCase<'a> {
                     Ok(()) => {
                         self.domain_event_bus.publish(todo.pull_domain_events()).await;
                         self.output_port.success(CreateTodoOutputData { id: todo.id() }).await;
-                    },
+                    }
                     Err(error) => {
                         self.output_port.failure(Box::new(error)).await;
-                    },
+                    }
                 }
-            },
+            }
             Err(error) => {
                 self.output_port.failure(Box::new(error)).await;
-            },
+            }
         }
     }
 }

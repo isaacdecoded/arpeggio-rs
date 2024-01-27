@@ -5,24 +5,22 @@ use crate::{
             use_case_input_port::UseCaseInputPort,
             use_case_output_port::UseCaseOutputPort,
         },
-        domain::entities::{
-            value_object::ValueObject,
-            string_value_object::StringValueObject,
-        },
+        domain::entities::{ value_object::ValueObject, string_value_object::StringValueObject },
     },
     backoffice::todo::domain::{
-        entities::todo::Todo,
         errors::todo_not_found_error::TodoNotFoundError,
         repositories::todo_repository::TodoRepository,
     },
 };
 
 pub struct GetTodoInputData {
-  pub id: String
+    pub id: String,
 }
 
+pub struct TodoViewModel {}
+
 pub struct GetTodoOutputData {
-    pub todo: Todo
+    pub todo: TodoViewModel,
 }
 
 pub struct GetTodoUseCase<'a> {
@@ -33,7 +31,7 @@ pub struct GetTodoUseCase<'a> {
 impl<'a> GetTodoUseCase<'a> {
     pub fn new(
         repository: &'a dyn TodoRepository,
-        output_port: Box<dyn UseCaseOutputPort<GetTodoOutputData>>,
+        output_port: Box<dyn UseCaseOutputPort<GetTodoOutputData>>
     ) -> Self {
         Self {
             repository,
@@ -51,18 +49,16 @@ impl<'a> UseCaseInputPort<GetTodoInputData> for GetTodoUseCase<'a> {
             Ok(todo) => {
                 match todo {
                     Some(todo) => {
-                        self.output_port.success(GetTodoOutputData { todo }).await
-                    },
+                        self.output_port.success(GetTodoOutputData { todo: TodoViewModel {} }).await
+                    }
                     None => {
-                        self.output_port.failure(
-                            Box::new(TodoNotFoundError::new(&id)),
-                        ).await
-                    },
+                        self.output_port.failure(Box::new(TodoNotFoundError::new(&id))).await
+                    }
                 }
-            },
+            }
             Err(error) => {
                 self.output_port.failure(Box::new(error)).await;
-            },
+            }
         }
     }
 }

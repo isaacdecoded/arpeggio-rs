@@ -10,9 +10,9 @@ pub struct OnScreenGetTodoView {}
 impl View<GetTodoViewModel> for OnScreenGetTodoView {
     async fn transform(&self, view_model: GetTodoViewModel) {
         if let Some(todo) = view_model.todo {
-            let id = todo.id();
-            let name = todo.name();
-            println!("{}", format!("1. {id} - {name}"));
+            // let id = todo.id();
+            // let name = todo.name();
+            // println!("{}", format!("1. {id} - {name}"));
         }
         if let Some(error) = view_model.error {
             println!("Get Todo failed due to <{}>.", error.to_string())

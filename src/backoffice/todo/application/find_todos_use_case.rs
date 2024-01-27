@@ -6,17 +6,9 @@ use crate::{
             use_case_input_port::UseCaseInputPort,
             use_case_output_port::UseCaseOutputPort,
         },
-        domain::repositories::criteria::{
-            Criteria,
-            Filter,
-            FilterOperator,
-            FilterValue,
-        },
+        domain::repositories::criteria::{ Criteria, Filter, FilterOperator, FilterValue },
     },
-    backoffice::todo::domain::{
-        entities::todo::Todo,
-        repositories::todo_repository::TodoRepository,
-    },
+    backoffice::todo::domain::repositories::todo_repository::TodoRepository,
 };
 
 pub struct FindTodosInputData {
@@ -25,8 +17,10 @@ pub struct FindTodosInputData {
     pub limit: u16,
 }
 
+pub struct TodoViewModel {}
+
 pub struct FindTodosOutputData {
-    pub todos: Vec<Todo>
+    pub todos: Vec<TodoViewModel>,
 }
 
 pub struct FindTodosUseCase<'a> {
@@ -37,7 +31,7 @@ pub struct FindTodosUseCase<'a> {
 impl<'a> FindTodosUseCase<'a> {
     pub fn new(
         repository: &'a dyn TodoRepository,
-        output_port: Box<dyn UseCaseOutputPort<FindTodosOutputData>>,
+        output_port: Box<dyn UseCaseOutputPort<FindTodosOutputData>>
     ) -> Self {
         Self {
             repository,
@@ -55,23 +49,17 @@ impl<'a> UseCaseInputPort<FindTodosInputData> for FindTodosUseCase<'a> {
                 field: "name".to_string(),
                 operator: FilterOperator::Equal,
                 value: FilterValue { s: ManuallyDrop::new(name) },
-            })
+            });
         }
-        let criteria = Criteria::new(
-            filters,
-            Some(input_data.limit),
-            Some(input_data.offset),
-        );
-        let result = self.repository.find(
-            Some(criteria),
-        ).await;
+        let criteria = Criteria::new(filters, Some(input_data.limit), Some(input_data.offset));
+        let result = self.repository.find(Some(criteria)).await;
         match result {
             Ok(todos) => {
-                self.output_port.success(FindTodosOutputData { todos }).await;
-            },
+                self.output_port.success(FindTodosOutputData { todos: vec![] }).await;
+            }
             Err(error) => {
                 self.output_port.failure(Box::new(error)).await;
-            },
+            }
         }
     }
 }

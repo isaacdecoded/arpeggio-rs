@@ -3,3 +3,4 @@ pub mod get_todo_use_case;
 pub mod create_todo_use_case;
 pub mod update_todo_use_case;
 pub mod delete_todo_use_case;
+pub mod send_notification_on_todo_created_subscriber;

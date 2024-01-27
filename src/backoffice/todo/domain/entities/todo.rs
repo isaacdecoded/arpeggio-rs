@@ -1,17 +1,14 @@
-use chrono::{Local, DateTime};
-use crate::core::domain::entities::{
-        aggregate_root::AggregateRoot,
-        entity::{
-            Entity,
-            Newable,
-            Updatable,
-            Recreable,
-        },
-        string_value_object::StringValueObject,
-        value_object::ValueObject,
-        date_value_object::DateValueObject};
-use crate::core::domain::events::domain_event::DomainEvent;
+use crate::backoffice::todo::domain::events::todo_created_domain_event::TodoCreatedDomainEvent;
 use crate::backoffice::todo::domain::value_objects::todo_name::TodoName;
+use crate::core::domain::entities::{
+    aggregate_root::AggregateRoot,
+    date_value_object::DateValueObject,
+    entity::{ Entity, Newable, Recreable, Updatable },
+    string_value_object::StringValueObject,
+    value_object::ValueObject,
+};
+use crate::core::domain::events::domain_event::DomainEvent;
+use chrono::{ DateTime, Local };
 
 pub struct NewTodo {
     pub id: StringValueObject,
@@ -34,7 +31,7 @@ pub struct Todo {
     name: TodoName,
     created_at: DateValueObject,
     updated_at: Option<DateValueObject>,
-    domain_events: Vec<DomainEvent>
+    domain_events: Vec<DomainEvent>,
 }
 
 impl Todo {
@@ -53,7 +50,7 @@ impl Todo {
     pub fn updated_at(&self) -> Option<DateTime<Local>> {
         match self.updated_at {
             Some(updated_at) => Some(updated_at.value()),
-            None => None
+            None => None,
         }
     }
 }
@@ -95,10 +92,7 @@ impl Newable<NewTodo> for Todo {
             updated_at: None,
             domain_events: Vec::new(),
         };
-        todo.add_domain_event(DomainEvent::new(
-            todo.id.to_owned(),
-            StringValueObject::new("event_name".to_string())),
-        );
+        todo.add_domain_event(TodoCreatedDomainEvent::new(todo.id()));
         todo
     }
 }
