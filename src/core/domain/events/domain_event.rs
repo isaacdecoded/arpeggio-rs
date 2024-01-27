@@ -1,58 +1,50 @@
-use chrono::Local;
-use crate::core::domain::entities::{
-    value_object::ValueObject,
-    string_value_object::StringValueObject,
-    date_value_object::DateValueObject,
-};
+use chrono::{ Local, DateTime };
 
-pub trait DomainEvent2 {
-    fn aggregate_id(&self) -> StringValueObject;
-    fn event_name(&self) -> StringValueObject;
-    fn occurring_time(&self) -> DateValueObject;
+pub trait DEvent: Send + Sync {
+    fn get_name(&self) -> String;
+    fn get_aggregate_root_id(&self) -> String;
+    fn get_occurring_time(&self) -> DateTime<Local>;
 }
 
 #[derive(Clone)]
 pub struct DomainEvent {
-    pub aggregate_id: StringValueObject,
-    pub event_name: StringValueObject,
-    pub occurring_time: DateValueObject,
+    name: String,
+    aggregate_root_id: String,
+    occurring_time: DateTime<Local>,
 }
 
 impl DomainEvent {
-    pub fn new(aggregate_id: StringValueObject, event_name: StringValueObject) -> DomainEvent {
+    pub fn new(name: String, aggregate_root_id: String) -> DomainEvent {
         DomainEvent {
-            aggregate_id,
-            event_name,
-            occurring_time: DateValueObject::new(Local::now()),
+            name,
+            aggregate_root_id,
+            occurring_time: Local::now(),
         }
     }
 
-    pub fn aggregate_id(&self) -> String {
-        self.aggregate_id.value()
+    pub fn get_name(&self) -> String {
+        self.name.to_string()
     }
 
-    pub fn event_name(&self) -> String {
-        self.event_name.value()
+    pub fn get_aggregate_root_id(&self) -> String {
+        self.aggregate_root_id.to_string()
+    }
+
+    pub fn get_occurring_time(&self) -> DateTime<Local> {
+        self.occurring_time
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::core::domain::entities::{
-        value_object::ValueObject,
-        string_value_object::StringValueObject,
-    };
     use crate::core::domain::events::domain_event::DomainEvent;
 
     #[test]
     fn should_initialize_valid_instance() {
-        let aggregate_id = StringValueObject::new("id".to_string());
-        let event_name = StringValueObject::new("domain event name".to_string());
-        let domain_event = DomainEvent::new(
-            aggregate_id,
-            event_name,
-        );
-        assert_eq!(domain_event.aggregate_id(), "id".to_string());
-        assert_eq!(domain_event.event_name(), "domain event name".to_string());
+        let aggregate_root_id = "id".to_string();
+        let name = "domain event name".to_string();
+        let domain_event = DomainEvent::new(name, aggregate_root_id);
+        assert_eq!(domain_event.get_aggregate_root_id(), "id".to_string());
+        assert_eq!(domain_event.get_name(), "domain event name".to_string());
     }
 }

@@ -1,1 +1,1 @@
-pub mod in_memory_event_bus;
+pub mod in_memory_domain_event_bus;
