@@ -1,4 +1,4 @@
 pub trait ValueObject<T> {
     fn new(value: T) -> Self;
-    fn value(&self) -> T;
+    fn get_value(&self) -> &T;
 }

@@ -22,7 +22,6 @@ impl<'a> InMemoryDomainEventBus<'a> {
 impl<'a> DomainEventBus<'a> for InMemoryDomainEventBus<'a> {
     async fn publish(&self, domain_events: Vec<DomainEvent>) {
         for domain_event in domain_events.iter() {
-            println!("{}", domain_event.get_name());
             if let Some(subscribers) = self.subscribers.get(&domain_event.get_name()) {
                 for subscriber in subscribers.iter() {
                     subscriber.on(domain_event).await;

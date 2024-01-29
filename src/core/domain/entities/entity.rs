@@ -1,24 +1,21 @@
-use crate::core::domain::entities::{
-    value_object::ValueObject,
-    date_value_object::DateValueObject,
-};
-
-pub trait Newable<Props> {
-    fn new(props: Props) -> Self;
-}
-
-pub trait Updatable<Props> {
-    fn update(&mut self, props: Props);
-}
-
-pub trait Recreable<Props> {
-    fn recreate(props: Props) -> Self;
-}
+use crate::core::domain::entities::identity_object::IdentityObject;
 
 pub trait Entity {
-    type Id: ValueObject<String>;
+    fn get_id(&self) -> &IdentityObject;
+}
 
-    fn id(&self) -> &Self::Id;
-    fn created_at(&self) -> &DateValueObject;
-    fn updated_at(&self) -> &Option<DateValueObject>;
+pub trait Creatable<Props>: Entity {
+    fn create(props: Props) -> Self;
+    // fn get_created_at(&self) -> &DateValueObject;
+}
+
+pub trait Updatable<Props>: Entity {
+    fn update(&mut self, props: Props);
+    // fn get_updated_at(&self) -> &DateValueObject;
+}
+
+pub trait Recreatable<Props>: Entity {
+    fn recreate(props: Props) -> Self;
+    // fn get_created_at(&self) -> &DateValueObject;
+    // fn get_updated_at(&self) -> &DateValueObject;
 }
