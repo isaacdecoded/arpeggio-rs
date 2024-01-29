@@ -1,6 +1,6 @@
+use async_trait::async_trait;
 use crate::core::domain::events::domain_event::DomainEvent;
 use crate::core::domain::events::domain_event_subscriber::DomainEventSubscriber;
-use async_trait::async_trait;
 
 #[async_trait]
 pub trait DomainEventBus<'a>: Send + Sync {

@@ -1,5 +1,5 @@
 use std::mem::ManuallyDrop;
-use chrono::{Local, DateTime};
+use chrono::{ Local, DateTime };
 
 pub enum FilterOperator {
     Equal,
@@ -8,13 +8,6 @@ pub enum FilterOperator {
     LessThan,
     Contains,
     NotContains,
-}
-
-pub union FilterValue {
-    pub i: i32,
-    pub s: ManuallyDrop<String>,
-    pub b: bool,
-    pub d: DateTime<Local>,
 }
 
 pub enum SortOrder {
@@ -30,7 +23,7 @@ pub struct Sort {
 pub struct Filter {
     pub field: String,
     pub operator: FilterOperator,
-    pub value: FilterValue,
+    pub value: String,
 }
 
 pub struct Criteria {
@@ -40,11 +33,7 @@ pub struct Criteria {
 }
 
 impl Criteria {
-    pub fn new(
-        filters: Vec<Filter>,
-        limit: Option<u16>,
-        offset: Option<u16>,
-    ) -> Self {
+    pub fn new(filters: Vec<Filter>, limit: Option<u16>, offset: Option<u16>) -> Self {
         Self {
             filters,
             limit,
@@ -58,35 +47,5 @@ impl Criteria {
             limit: None,
             offset: None,
         }
-    }
-}
-
-fn a() {
-    let f = Filter{
-        field: "name".to_string(),
-        operator: FilterOperator::Equal,
-        value: FilterValue{
-            s: ManuallyDrop::new("Isaac".to_string())
-        },
-    };
-    let c = Criteria::new(vec![f], None, None);
-    for filter in c.filters {
-        unsafe {
-            match filter.value {
-                FilterValue { i } => (),
-                FilterValue { s } => (),
-                FilterValue { b } => (),
-                FilterValue { d } => (),
-                _ => {}
-            }
-        }
-        match filter.operator {
-            FilterOperator::Contains => {}
-            FilterOperator::Equal => todo!(),
-            FilterOperator::NotEqual => todo!(),
-            FilterOperator::GreaterThan => todo!(),
-            FilterOperator::LessThan => todo!(),
-            FilterOperator::NotContains => todo!(),
-        };
     }
 }
