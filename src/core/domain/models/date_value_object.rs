@@ -1,5 +1,5 @@
 use chrono::{ Local, DateTime };
-use crate::core::domain::entities::value_object::ValueObject;
+use crate::core::domain::models::value_object::ValueObject;
 
 #[derive(Copy, Clone, PartialEq)]
 pub struct DateValueObject {
@@ -14,12 +14,22 @@ impl ValueObject<DateTime<Local>> for DateValueObject {
     fn get_value(&self) -> &DateTime<Local> {
         &self.value
     }
+
+    fn is_equal(&self, other: &Self) -> bool {
+        self.value == *other.get_value()
+    }
+}
+
+impl DateValueObject {
+    pub fn now() -> Self {
+        DateValueObject::new(Local::now())
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use chrono::Local;
-    use crate::core::domain::entities::{
+    use crate::core::domain::models::{
         value_object::ValueObject,
         date_value_object::DateValueObject,
     };
