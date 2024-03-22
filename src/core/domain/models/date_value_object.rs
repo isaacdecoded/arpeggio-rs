@@ -38,6 +38,6 @@ mod tests {
     fn should_initialize_valid_instance() {
         let value = Local::now();
         let vo = DateValueObject::new(value);
-        // assert_eq!(vo.get_value(), value);
+        assert_eq!(vo.get_value().to_owned(), value);
     }
 }
