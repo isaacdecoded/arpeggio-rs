@@ -31,8 +31,8 @@ mod tests {
 
     #[test]
     fn should_initialize_valid_instance() {
-        let value = "str value".to_string();
+        let value = "identity_value".to_string();
         let vo = IdentityObject::new(value);
-        assert_eq!(vo.get_value().to_string(), "str value".to_string());
+        assert_eq!(vo.get_value().to_string(), "identity_value".to_string());
     }
 }

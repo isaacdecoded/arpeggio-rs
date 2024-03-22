@@ -50,3 +50,84 @@ impl DomainEventBus for InMemoryDomainEventBus {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::core::{
+        domain::events::{
+            domain_event_bus::DomainEventBus,
+            domain_event::DomainEvent,
+            domain_event_subscriber::DomainEventSubscriber,
+        },
+        infrastructure::in_memory_domain_event_bus::InMemoryDomainEventBus,
+    };
+    use chrono::prelude::{ DateTime, Local };
+    use async_trait::async_trait;
+    use std::any::Any;
+
+    struct TestSubscriber;
+    struct TestDomainEvent {
+        aggregate_root_id: String,
+        occurring_time: DateTime<Local>,
+    }
+
+    impl TestSubscriber {
+        pub fn new() -> Self {
+            Self {}
+        }
+    }
+
+    impl TestDomainEvent {
+        pub fn new() -> Self {
+            Self {
+                aggregate_root_id: "aggregate_root_id".to_string(),
+                occurring_time: Local::now(),
+            }
+        }
+    }
+
+    #[async_trait]
+    impl DomainEventSubscriber for TestSubscriber {
+        fn subscribed_to(&self) -> String {
+            "test".to_string()
+        }
+
+        async fn on(
+            &self,
+            _domain_event: &dyn DomainEvent
+        ) -> Result<(), Box<dyn std::error::Error>> {
+            Ok(())
+        }
+    }
+
+    impl DomainEvent for TestDomainEvent {
+        fn get_name(&self) -> String {
+            "test".to_string()
+        }
+
+        fn get_aggregate_root_id(&self) -> &String {
+            &self.aggregate_root_id
+        }
+
+        fn get_occurring_time(&self) -> &DateTime<Local> {
+            &self.occurring_time
+        }
+
+        fn as_any(&self) -> &dyn Any {
+            self
+        }
+    }
+
+    #[tokio::test]
+    async fn should_initialize_valid_instance() {
+        let mut in_memory_domain_event_bus = InMemoryDomainEventBus::new();
+        let subscriber = TestSubscriber::new();
+        let domain_events: Vec<Box<dyn DomainEvent>> = vec![Box::new(TestDomainEvent::new())];
+        let add_subscriber_result = in_memory_domain_event_bus.add_subscriber(
+            Box::new(subscriber)
+        ).await;
+        let publish_result = in_memory_domain_event_bus.publish(domain_events).await;
+        assert_eq!(add_subscriber_result.is_ok(), true);
+        assert_eq!(publish_result.is_ok(), true);
+    }
+}
