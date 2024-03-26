@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use std::error::Error;
+use std::sync::Arc;
 use crate::core::domain::events::domain_event_subscriber::DomainEventSubscriber;
 use crate::core::domain::events::domain_event::DomainEvent;
 use crate::backoffice::plan::domain::{
@@ -13,14 +14,12 @@ pub struct EmailRecipientData {
 }
 
 pub struct SendNotificationOnTodoAddedSubscriber {
-    notification_service: Box<dyn NotificationService>,
+    notification_service: Arc<dyn NotificationService>,
 }
 
 impl SendNotificationOnTodoAddedSubscriber {
-    pub fn new(notification_service: Box<dyn NotificationService>) -> Self {
-        Self {
-            notification_service,
-        }
+    pub fn new(notification_service: Arc<dyn NotificationService>) -> Box<Self> {
+        Box::new(Self { notification_service })
     }
 }
 
@@ -36,7 +35,7 @@ impl DomainEventSubscriber for SendNotificationOnTodoAddedSubscriber {
             let request = TodoAddedNotificationRequest {
                 todo_id: todo_created.get_aggregate_root_id().to_string(),
                 todo_description: todo_created.get_todo_description().to_string(),
-                todo_created_at: todo_created.get_todo_created_at().to_owned(),
+                todo_created_at: todo_created.get_todo_added_at().to_owned(),
             };
             self.notification_service.send_new_todo_details(request).await?;
             return Ok(());
