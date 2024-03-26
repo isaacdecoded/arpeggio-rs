@@ -35,17 +35,19 @@ impl DomainEventBus for InMemoryDomainEventBus {
         Ok(())
     }
 
-    async fn add_subscriber(
+    async fn add_subscribers(
         &mut self,
-        subscriber: Box<dyn DomainEventSubscriber>
+        subscribers: Vec<Box<dyn DomainEventSubscriber>>
     ) -> Result<(), Box<dyn Error>> {
-        let subscriber_domain_event_name = subscriber.subscribed_to();
-        if let Some(subscribers) = self.subscribers.get_mut(&subscriber_domain_event_name) {
-            subscribers.push(subscriber);
-        } else {
-            let mut subscribers = Vec::new();
-            subscribers.push(subscriber);
-            self.subscribers.insert(subscriber_domain_event_name, subscribers);
+        for subscriber in subscribers {
+            let subscriber_domain_event_name = subscriber.subscribed_to();
+            if let Some(subscribers) = self.subscribers.get_mut(&subscriber_domain_event_name) {
+                subscribers.push(subscriber);
+            } else {
+                let mut subscribers = Vec::new();
+                subscribers.push(subscriber);
+                self.subscribers.insert(subscriber_domain_event_name, subscribers);
+            }
         }
         Ok(())
     }
@@ -123,8 +125,8 @@ mod tests {
         let mut in_memory_domain_event_bus = InMemoryDomainEventBus::new();
         let subscriber = TestSubscriber::new();
         let domain_events: Vec<Box<dyn DomainEvent>> = vec![Box::new(TestDomainEvent::new())];
-        let add_subscriber_result = in_memory_domain_event_bus.add_subscriber(
-            Box::new(subscriber)
+        let add_subscriber_result = in_memory_domain_event_bus.add_subscribers(
+            vec![Box::new(subscriber)]
         ).await;
         let publish_result = in_memory_domain_event_bus.publish(domain_events).await;
         assert_eq!(add_subscriber_result.is_ok(), true);
