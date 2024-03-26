@@ -9,7 +9,11 @@ use crate::core::domain::models::{
     value_object::ValueObject,
 };
 use crate::core::domain::events::domain_event::DomainEvent;
-use crate::backoffice::plan::domain::events::todo_added_domain_event::TodoAddedDomainEvent;
+use crate::backoffice::plan::domain::events::{
+    plan_created_domain_event::PlanCreatedDomainEvent,
+    plan_completed_domain_event::PlanCompletedDomainEvent,
+    todo_added_domain_event::TodoAddedDomainEvent,
+};
 use crate::backoffice::plan::domain::entities::todo::{ Todo, CreateTodoProps };
 use crate::backoffice::plan::domain::enums::todo_status::TodoStatus;
 use crate::backoffice::plan::domain::value_objects::plan_name::PlanName;
@@ -47,14 +51,16 @@ impl Plan {
     }
 
     pub fn create(props: CreatePlanProps) -> Self {
-        Self {
+        let mut plan = Self {
             id: props.id,
             name: props.name,
             todos: props.todos.unwrap_or(Vec::new()),
             created_at: DateValueObject::now(),
             updated_at: None,
             domain_events: Vec::new(),
-        }
+        };
+        plan.add_domain_event(Box::new(PlanCreatedDomainEvent::new(&plan)));
+        return plan;
     }
 
     pub fn recreate(props: RecreatePlanProps) -> Self {
@@ -126,9 +132,9 @@ impl Plan {
         self.todos.iter().all(|t| t.get_status() == &TodoStatus::DONE)
     }
 
-    fn check_completeness(&self) {
+    fn check_completeness(&mut self) {
         if self.is_completed() {
-            // self.add_domain_event(PlanCompletedDomainEvent::new(&self));
+            self.add_domain_event(Box::new(PlanCompletedDomainEvent::new(&self)));
         }
     }
 

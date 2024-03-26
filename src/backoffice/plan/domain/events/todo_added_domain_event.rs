@@ -10,7 +10,7 @@ pub struct TodoAddedDomainEvent {
     aggregate_root_id: String,
     occurring_time: DateTime<Local>,
     todo_description: String,
-    todo_created_at: DateTime<Local>,
+    todo_added_at: DateTime<Local>,
 }
 
 impl TodoAddedDomainEvent {
@@ -19,20 +19,20 @@ impl TodoAddedDomainEvent {
             aggregate_root_id: todo.get_id().to_string(),
             occurring_time: Local::now(),
             todo_description: todo.get_description().to_string(),
-            todo_created_at: todo.get_created_at().to_owned(),
+            todo_added_at: todo.get_created_at().to_owned(),
         })
     }
 
     pub fn name() -> String {
-        "TodoCreated".to_string()
+        "TodoAdded".to_string()
     }
 
     pub fn get_todo_description(&self) -> &String {
         &self.todo_description
     }
 
-    pub fn get_todo_created_at(&self) -> &DateTime<Local> {
-        &self.todo_created_at
+    pub fn get_todo_added_at(&self) -> &DateTime<Local> {
+        &self.todo_added_at
     }
 }
 

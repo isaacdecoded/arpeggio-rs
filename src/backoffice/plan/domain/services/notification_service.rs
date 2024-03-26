@@ -3,6 +3,12 @@ use std::error::Error;
 use async_trait::async_trait;
 use chrono::{ DateTime, Local };
 
+pub struct PlanCreatedNotificationRequest {
+    pub plan_id: String,
+    pub plan_name: String,
+    pub plan_created_at: DateTime<Local>,
+}
+
 pub struct PlanCompletedNotificationRequest {
     pub plan_id: String,
     pub plan_name: String,
@@ -30,6 +36,10 @@ impl Error for NotificationServiceError {}
 
 #[async_trait]
 pub trait NotificationService: Sync + Send {
+    async fn notify_plan_created(
+        &self,
+        request: PlanCreatedNotificationRequest
+    ) -> Result<(), NotificationServiceError>;
     async fn notify_plan_completed(
         &self,
         request: PlanCompletedNotificationRequest
