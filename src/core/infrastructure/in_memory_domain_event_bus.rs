@@ -7,16 +7,9 @@ use crate::core::domain::events::{
 };
 use std::collections::HashMap;
 
+#[derive(Default)]
 pub struct InMemoryDomainEventBus {
     subscribers: HashMap<String, Vec<Box<dyn DomainEventSubscriber>>>,
-}
-
-impl InMemoryDomainEventBus {
-    pub fn new() -> Self {
-        Self {
-            subscribers: HashMap::new(),
-        }
-    }
 }
 
 #[async_trait]
@@ -24,7 +17,7 @@ impl DomainEventBus for InMemoryDomainEventBus {
     async fn publish(
         &self,
         domain_events: Vec<Box<dyn DomainEvent>>
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<(), Box<dyn Error + Send + Sync>> {
         for domain_event in domain_events.iter() {
             if let Some(subscribers) = self.subscribers.get(&domain_event.get_name()) {
                 for subscriber in subscribers.iter() {
@@ -44,8 +37,7 @@ impl DomainEventBus for InMemoryDomainEventBus {
             if let Some(subscribers) = self.subscribers.get_mut(&subscriber_domain_event_name) {
                 subscribers.push(subscriber);
             } else {
-                let mut subscribers = Vec::new();
-                subscribers.push(subscriber);
+                let subscribers = vec![subscriber];
                 self.subscribers.insert(subscriber_domain_event_name, subscribers);
             }
         }
@@ -55,6 +47,9 @@ impl DomainEventBus for InMemoryDomainEventBus {
 
 #[cfg(test)]
 mod tests {
+    use std::error::Error;
+    use async_trait::async_trait;
+    use std::{ any::Any, time::SystemTime };
     use crate::core::{
         domain::events::{
             domain_event_bus::DomainEventBus,
@@ -63,14 +58,11 @@ mod tests {
         },
         infrastructure::in_memory_domain_event_bus::InMemoryDomainEventBus,
     };
-    use chrono::prelude::{ DateTime, Local };
-    use async_trait::async_trait;
-    use std::any::Any;
 
     struct TestSubscriber;
     struct TestDomainEvent {
         aggregate_root_id: String,
-        occurring_time: DateTime<Local>,
+        occurring_time: SystemTime,
     }
 
     impl TestSubscriber {
@@ -83,7 +75,7 @@ mod tests {
         pub fn new() -> Self {
             Self {
                 aggregate_root_id: "aggregate_root_id".to_string(),
-                occurring_time: Local::now(),
+                occurring_time: SystemTime::now(),
             }
         }
     }
@@ -97,7 +89,7 @@ mod tests {
         async fn on(
             &self,
             _domain_event: &dyn DomainEvent
-        ) -> Result<(), Box<dyn std::error::Error>> {
+        ) -> Result<(), Box<dyn Error + Send + Sync>> {
             Ok(())
         }
     }
@@ -111,7 +103,7 @@ mod tests {
             &self.aggregate_root_id
         }
 
-        fn get_occurring_time(&self) -> &DateTime<Local> {
+        fn get_occurring_time(&self) -> &SystemTime {
             &self.occurring_time
         }
 
@@ -122,14 +114,14 @@ mod tests {
 
     #[tokio::test]
     async fn should_initialize_valid_instance() {
-        let mut in_memory_domain_event_bus = InMemoryDomainEventBus::new();
+        let mut in_memory_domain_event_bus = InMemoryDomainEventBus::default();
         let subscriber = TestSubscriber::new();
         let domain_events: Vec<Box<dyn DomainEvent>> = vec![Box::new(TestDomainEvent::new())];
         let add_subscriber_result = in_memory_domain_event_bus.add_subscribers(
             vec![Box::new(subscriber)]
         ).await;
         let publish_result = in_memory_domain_event_bus.publish(domain_events).await;
-        assert_eq!(add_subscriber_result.is_ok(), true);
-        assert_eq!(publish_result.is_ok(), true);
+        assert!(add_subscriber_result.is_ok());
+        assert!(publish_result.is_ok());
     }
 }

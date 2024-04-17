@@ -1,17 +1,17 @@
-use chrono::{ Local, DateTime };
+use std::time::SystemTime;
 use crate::core::domain::models::value_object::ValueObject;
 
 #[derive(Copy, Clone, PartialEq)]
 pub struct DateValueObject {
-    value: DateTime<Local>,
+    value: SystemTime,
 }
 
-impl ValueObject<DateTime<Local>> for DateValueObject {
-    fn new(value: DateTime<Local>) -> Self {
+impl ValueObject<SystemTime> for DateValueObject {
+    fn new(value: SystemTime) -> Self {
         DateValueObject { value }
     }
 
-    fn get_value(&self) -> &DateTime<Local> {
+    fn get_value(&self) -> &SystemTime {
         &self.value
     }
 
@@ -22,13 +22,13 @@ impl ValueObject<DateTime<Local>> for DateValueObject {
 
 impl DateValueObject {
     pub fn now() -> Self {
-        DateValueObject::new(Local::now())
+        DateValueObject::new(SystemTime::now())
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use chrono::Local;
+    use std::time::SystemTime;
     use crate::core::domain::models::{
         value_object::ValueObject,
         date_value_object::DateValueObject,
@@ -36,7 +36,7 @@ mod tests {
 
     #[test]
     fn should_initialize_valid_instance() {
-        let value = Local::now();
+        let value = SystemTime::now();
         let vo = DateValueObject::new(value);
         assert_eq!(vo.get_value().to_owned(), value);
     }

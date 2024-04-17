@@ -1,3 +1,4 @@
+use std::fmt;
 use crate::core::domain::models::value_object::ValueObject;
 
 #[derive(Clone)]
@@ -5,9 +6,9 @@ pub struct IdentityObject {
     value: String,
 }
 
-impl IdentityObject {
-    pub fn to_string(&self) -> String {
-        self.value.clone()
+impl fmt::Display for IdentityObject {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.value)
     }
 }
 

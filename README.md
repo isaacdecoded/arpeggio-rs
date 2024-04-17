@@ -22,7 +22,7 @@ cargo test
 
 ### Dependencies
 
-Arpeggio on Rust keeps the codebase clean by including only the minor requirement tooling dependency as they are _async-trait + tokio_ for asynchronicity, and _chrono_ for dating features.
+Arpeggio on Rust keeps the codebase clean by including only the minor requirement tooling dependency as they are _async-trait + tokio_ for asynchronicity features.
 
 ## The Plan Concept example
 
