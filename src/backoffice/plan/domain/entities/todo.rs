@@ -1,3 +1,4 @@
+use std::time::SystemTime;
 use crate::core::domain::models::{
     entity::Entity,
     identity_object::IdentityObject,
@@ -8,7 +9,6 @@ use crate::backoffice::plan::domain::{
     value_objects::todo_description::TodoDescription,
     enums::todo_status::TodoStatus,
 };
-use chrono::{ DateTime, Local };
 
 pub struct CreateTodoProps {
     pub id: IdentityObject,
@@ -65,11 +65,11 @@ impl Entity<IdentityObject> for Todo {
         self.updated_at = Some(DateValueObject::now());
     }
 
-    fn get_created_at(&self) -> &DateTime<Local> {
+    fn get_created_at(&self) -> &SystemTime {
         self.created_at.get_value()
     }
 
-    fn get_updated_at(&self) -> Option<&DateTime<Local>> {
+    fn get_updated_at(&self) -> Option<&SystemTime> {
         self.updated_at.as_ref().map(|v| v.get_value())
     }
 }

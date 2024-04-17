@@ -1,5 +1,4 @@
 use async_trait::async_trait;
-use std::error::Error;
 use crate::{
     backoffice::plan::application::commands::create_plan_use_case::{
         CreatePlanUseCase,
@@ -25,7 +24,7 @@ impl<'a> CreatePlanController<'a> {
 
 #[async_trait]
 impl<'a> Controller<CreatePlanRequestObject> for CreatePlanController<'a> {
-    async fn execute(&self, request_object: CreatePlanRequestObject) -> Result<(), Box<dyn Error>> {
+    async fn execute(&self, request_object: CreatePlanRequestObject) {
         self.use_case.interact(CreatePlanRequestModel {
             name: request_object.name,
         }).await

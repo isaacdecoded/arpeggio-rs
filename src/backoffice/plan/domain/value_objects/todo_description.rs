@@ -1,3 +1,5 @@
+use std::error::Error;
+
 use crate::core::domain::models::value_object::ValueObject;
 
 #[derive(Clone)]
@@ -5,12 +7,21 @@ pub struct TodoDescription {
     value: String,
 }
 
+impl TodoDescription {
+    const MAX_LENGTH: usize = 1200;
+}
+
 impl ValueObject<String> for TodoDescription {
-    fn new(value: String) -> Self {
-        if value.len() > 1200 {
-            panic!("The description exceeds the maximum length of 500 characters.");
+    fn new(value: String) -> Result<Self, Box<dyn Error + Sync + Send>> {
+        if value.len() > Self::MAX_LENGTH {
+            return Err(
+                format!(
+                    "The description exceeds the maximum length of {} characters.",
+                    Self::MAX_LENGTH
+                ).into()
+            );
         }
-        TodoDescription { value }
+        Ok(TodoDescription { value })
     }
 
     fn get_value(&self) -> &String {
@@ -22,19 +33,22 @@ impl ValueObject<String> for TodoDescription {
     }
 }
 
-/*
 #[cfg(test)]
 mod tests {
-    use crate::core::domain::entities::{
-        value_object::ValueObject,
-        string_value_object::StringValueObject,
-    };
+    use crate::core::domain::models::value_object::ValueObject;
+    use crate::backoffice::plan::domain::value_objects::todo_description::TodoDescription;
 
     #[test]
     fn should_initialize_valid_instance() {
-        let value = "str value".to_string();
-        let vo = StringValueObject::new(value);
-        assert_eq!(vo.value(), "str value".to_string());
+        let value = "Lorem Ipsum";
+        let vo = TodoDescription::new(value.to_string()).unwrap();
+        assert_eq!(vo.get_value(), value);
+    }
+
+    #[test]
+    fn should_refuse_invalid_instance() {
+        let value = "Lorem Ipsum".repeat(110);
+        let vo = TodoDescription::new(value.to_string());
+        assert!(vo.is_err());
     }
 }
-*/

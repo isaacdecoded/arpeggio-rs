@@ -22,10 +22,10 @@ impl SendNotificationOnPlanCompletedSubscriber {
 #[async_trait]
 impl DomainEventSubscriber for SendNotificationOnPlanCompletedSubscriber {
     fn subscribed_to(&self) -> String {
-        String::from(PlanCompletedDomainEvent::name())
+        PlanCompletedDomainEvent::name()
     }
 
-    async fn on(&self, domain_event: &dyn DomainEvent) -> Result<(), Box<dyn Error>> {
+    async fn on(&self, domain_event: &dyn DomainEvent) -> Result<(), Box<dyn Error + Send + Sync>> {
         let plan_completed_option = domain_event
             .as_any()
             .downcast_ref::<PlanCompletedDomainEvent>();
@@ -38,6 +38,6 @@ impl DomainEventSubscriber for SendNotificationOnPlanCompletedSubscriber {
             self.notification_service.notify_plan_completed(request).await?;
             return Ok(());
         }
-        Err(Box::from(format!("Invalid domain event type with name {}", domain_event.get_name())))
+        Err(format!("Invalid domain event type with name {}", domain_event.get_name()).into())
     }
 }

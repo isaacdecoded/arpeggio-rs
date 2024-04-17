@@ -5,17 +5,12 @@ use crate::{
     backoffice::plan::application::queries::find_plans_use_case::FindPlansResponseModel,
 };
 
+#[derive(Default)]
 pub struct FindPlansPresenter;
-
-impl FindPlansPresenter {
-    pub fn new() -> Self {
-        Self {}
-    }
-}
 
 #[async_trait]
 impl UseCaseOutputPort<FindPlansResponseModel> for FindPlansPresenter {
-    async fn success(&self, response_model: FindPlansResponseModel) -> Result<(), Box<dyn Error>> {
+    async fn success(&self, response_model: FindPlansResponseModel) {
         let mut info: std::collections::HashMap<String, String> = std::collections::HashMap::new();
         for (idx, plan) in response_model.plans.iter().enumerate() {
             info.insert(
@@ -29,11 +24,9 @@ impl UseCaseOutputPort<FindPlansResponseModel> for FindPlansPresenter {
             println!("{}: {}", key, value);
         }
         println!("===");
-        Ok(())
     }
 
-    async fn failure(&self, error: Box<dyn Error + Send>) -> Result<(), Box<dyn Error>> {
-        eprintln!("{}", error.to_string());
-        Ok(())
+    async fn failure(&self, error: Box<dyn Error + Send + Sync>) {
+        eprintln!("{}", error)
     }
 }

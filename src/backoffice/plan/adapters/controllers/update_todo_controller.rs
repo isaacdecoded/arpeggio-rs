@@ -1,5 +1,4 @@
 use async_trait::async_trait;
-use std::error::Error;
 use crate::{
     backoffice::plan::application::commands::update_todo_use_case::{
         UpdateTodoUseCase,
@@ -27,7 +26,7 @@ impl<'a> UpdateTodoController<'a> {
 
 #[async_trait]
 impl<'a> Controller<UpdateTodoRequestObject> for UpdateTodoController<'a> {
-    async fn execute(&self, request_object: UpdateTodoRequestObject) -> Result<(), Box<dyn Error>> {
+    async fn execute(&self, request_object: UpdateTodoRequestObject) {
         self.use_case.interact(UpdateTodoRequestModel {
             plan_id: request_object.plan_id,
             todo_id: request_object.todo_id,

@@ -1,4 +1,4 @@
-use chrono::{ DateTime, Local };
+use std::time::SystemTime;
 use std::collections::HashMap;
 use std::sync::{ Arc, RwLock };
 use crate::{ backoffice::plan::domain::entities::plan::Plan, core::domain::models::entity::Entity };
@@ -9,30 +9,30 @@ pub struct TodoWriteModel {
     pub plan_id: String,
     pub description: String,
     pub status: String,
-    pub created_at: DateTime<Local>,
-    pub updated_at: Option<DateTime<Local>>,
+    pub created_at: SystemTime,
+    pub updated_at: Option<SystemTime>,
 }
 
 pub struct PlanWriteModel {
     pub name: String,
-    pub created_at: DateTime<Local>,
-    pub updated_at: Option<DateTime<Local>>,
+    pub created_at: SystemTime,
+    pub updated_at: Option<SystemTime>,
 }
 
 pub struct TodoReadModel {
     pub id: String,
     pub description: String,
     pub status: String,
-    pub created_at: DateTime<Local>,
-    pub updated_at: Option<DateTime<Local>>,
+    pub created_at: SystemTime,
+    pub updated_at: Option<SystemTime>,
 }
 
 pub struct PlanReadModel {
     pub id: String,
     pub name: String,
     pub todos: Vec<TodoReadModel>,
-    pub created_at: DateTime<Local>,
-    pub updated_at: Option<DateTime<Local>>,
+    pub created_at: SystemTime,
+    pub updated_at: Option<SystemTime>,
 }
 
 pub struct InMemoryRepository {

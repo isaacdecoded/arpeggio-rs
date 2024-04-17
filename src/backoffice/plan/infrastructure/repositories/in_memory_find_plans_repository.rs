@@ -30,7 +30,7 @@ impl FindPlansRepository<FindPlansReadModel> for InMemoryFindPlansRepository {
     ) -> Result<Vec<FindPlansReadModel>, FindPlansRepositoryError> {
         let plans: Vec<_> = self.in_memory_repository.read_plans
             .read()
-            .unwrap()
+            .map_err(|e| FindPlansRepositoryError::FindError(e.to_string()))?
             .iter()
             .filter(|(_, plan_model)| {
                 criteria.filters

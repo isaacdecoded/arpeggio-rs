@@ -44,22 +44,35 @@ impl<'a> CreatePlanUseCase<'a> {
             domain_event_bus,
         }
     }
-}
 
-#[async_trait]
-impl<'a> UseCaseInputPort<CreatePlanRequestModel> for CreatePlanUseCase<'a> {
-    async fn interact(&self, request_model: CreatePlanRequestModel) -> Result<(), Box<dyn Error>> {
+    async fn try_interact(
+        &self,
+        request_model: CreatePlanRequestModel
+    ) -> Result<CreatePlanResponseModel, Box<dyn Error + Send + Sync>> {
         let id = self.repository.generate_id().await?;
         let mut plan = Plan::create(CreatePlanProps {
             id,
-            name: PlanName::new(request_model.name),
+            name: PlanName::new(request_model.name)?,
             todos: None,
         });
         self.domain_event_bus.publish(plan.pull_domain_events()).await?;
         self.repository.save(&plan).await?;
-        self.output_port.success(CreatePlanResponseModel {
+        Ok(CreatePlanResponseModel {
             id: plan.get_id().to_string(),
-        }).await?;
-        Ok(())
+        })
+    }
+}
+
+#[async_trait]
+impl<'a> UseCaseInputPort<CreatePlanRequestModel> for CreatePlanUseCase<'a> {
+    async fn interact(&self, request_model: CreatePlanRequestModel) {
+        match self.try_interact(request_model).await {
+            Ok(response_model) => {
+                self.output_port.success(response_model).await;
+            }
+            Err(error) => {
+                self.output_port.failure(error).await;
+            }
+        }
     }
 }

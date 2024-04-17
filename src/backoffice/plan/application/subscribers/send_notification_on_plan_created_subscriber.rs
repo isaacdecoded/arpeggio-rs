@@ -22,10 +22,10 @@ impl SendNotificationOnPlanCreatedSubscriber {
 #[async_trait]
 impl DomainEventSubscriber for SendNotificationOnPlanCreatedSubscriber {
     fn subscribed_to(&self) -> String {
-        String::from(PlanCreatedDomainEvent::name())
+        PlanCreatedDomainEvent::name()
     }
 
-    async fn on(&self, domain_event: &dyn DomainEvent) -> Result<(), Box<dyn Error>> {
+    async fn on(&self, domain_event: &dyn DomainEvent) -> Result<(), Box<dyn Error + Send + Sync>> {
         let plan_created_option = domain_event.as_any().downcast_ref::<PlanCreatedDomainEvent>();
         if let Some(plan_created) = plan_created_option {
             let request = PlanCreatedNotificationRequest {
@@ -36,6 +36,6 @@ impl DomainEventSubscriber for SendNotificationOnPlanCreatedSubscriber {
             self.notification_service.notify_plan_created(request).await?;
             return Ok(());
         }
-        Err(Box::from(format!("Invalid domain event type with name {}", domain_event.get_name())))
+        Err(format!("Invalid domain event type with name {}", domain_event.get_name()).into())
     }
 }

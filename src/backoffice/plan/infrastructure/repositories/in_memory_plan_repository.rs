@@ -55,30 +55,28 @@ impl InMemoryPlanRepository {
             None => Vec::new(),
         };
         Plan::recreate(RecreatePlanProps {
-            id: IdentityObject::new(id.to_string()),
-            name: PlanName::new(model.name.to_string()),
+            id: IdentityObject::new(id.to_string()).unwrap(),
+            name: PlanName::new(model.name.to_string()).unwrap(),
             todos: Some(
                 todo_models
                     .iter()
                     .map(|todo| {
                         Todo::new(CreateTodoProps {
-                            id: IdentityObject::new(todo.id.to_string()),
-                            description: TodoDescription::new(todo.description.to_string()),
+                            id: IdentityObject::new(todo.id.to_string()).unwrap(),
+                            description: TodoDescription::new(
+                                todo.description.to_string()
+                            ).unwrap(),
                             status: TodoStatus::from_str(&todo.status).unwrap(),
-                            created_at: DateValueObject::new(todo.created_at),
-                            updated_at: match todo.updated_at {
-                                Some(updated_at) => Some(DateValueObject::new(updated_at)),
-                                None => None,
-                            },
+                            created_at: DateValueObject::new(todo.created_at).unwrap(),
+                            updated_at: todo.updated_at.map(|date| {
+                                DateValueObject::new(date).unwrap()
+                            }),
                         })
                     })
                     .collect()
             ),
-            created_at: DateValueObject::new(model.created_at),
-            updated_at: match model.updated_at {
-                Some(updated_at) => Some(DateValueObject::new(updated_at)),
-                None => None,
-            },
+            created_at: DateValueObject::new(model.created_at).unwrap(),
+            updated_at: model.updated_at.map(|date| { DateValueObject::new(date).unwrap() }),
         })
     }
 }
@@ -87,7 +85,9 @@ impl InMemoryPlanRepository {
 impl PlanRepository for InMemoryPlanRepository {
     async fn get_by_id(&self, id: &IdentityObject) -> Result<Option<Plan>, PlanRepositoryError> {
         let id_value = id.get_value();
-        let result = self.in_memory_repository.write_plans.read().unwrap();
+        let result = self.in_memory_repository.write_plans
+            .read()
+            .map_err(|e| { PlanRepositoryError::GetByIdError(e.to_string()) })?;
         match result.get(id_value) {
             Some(plan_model) => { Ok(Some(self.plan_model_to_entity(id_value, plan_model))) }
             None => Ok(None),
@@ -97,7 +97,7 @@ impl PlanRepository for InMemoryPlanRepository {
     async fn save(&self, plan: &Plan) -> Result<(), PlanRepositoryError> {
         self.in_memory_repository.write_plans
             .write()
-            .unwrap()
+            .map_err(|e| { PlanRepositoryError::SaveError(e.to_string()) })?
             .insert(plan.get_id().to_string(), self.plan_to_model(plan));
 
         let todo_models: Vec<TodoWriteModel> = plan
@@ -108,13 +108,13 @@ impl PlanRepository for InMemoryPlanRepository {
 
         self.in_memory_repository.write_todos
             .write()
-            .unwrap()
+            .map_err(|e| { PlanRepositoryError::SaveError(e.to_string()) })?
             .insert(plan.get_id().to_string(), todo_models);
         self.in_memory_repository.sync_read_plans(plan);
         Ok(())
     }
 
     async fn generate_id(&self) -> Result<IdentityObject, PlanRepositoryError> {
-        Ok(IdentityObject::new(Uuid::new_v4().to_string()))
+        Ok(IdentityObject::new(Uuid::new_v4().to_string()).unwrap())
     }
 }

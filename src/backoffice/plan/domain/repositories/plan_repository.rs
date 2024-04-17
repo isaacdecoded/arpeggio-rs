@@ -1,21 +1,13 @@
-use std::fmt;
-use std::error::Error;
+use thiserror::Error;
 use async_trait::async_trait;
 use crate::core::domain::models::identity_object::IdentityObject;
 use crate::backoffice::plan::domain::entities::plan::Plan;
 
-#[derive(Debug)]
-pub struct PlanRepositoryError {
-    pub msg: String,
+#[derive(Error, Debug)]
+pub enum PlanRepositoryError {
+    #[error("Unable to get Plan by ID: {0}")] GetByIdError(String),
+    #[error("Unable to save Plan: {0}")] SaveError(String),
 }
-
-impl fmt::Display for PlanRepositoryError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.msg)
-    }
-}
-
-impl Error for PlanRepositoryError {}
 
 #[async_trait]
 pub trait PlanRepository: Sync {
