@@ -1,20 +1,11 @@
-use std::fmt;
-use std::error::Error;
+use thiserror::Error;
 use async_trait::async_trait;
 use crate::core::domain::repositories::criteria::Criteria;
 
-#[derive(Debug)]
-pub struct FindPlansRepositoryError {
-    pub msg: String,
+#[derive(Error, Debug)]
+pub enum FindPlansRepositoryError {
+    #[error("Unable to find Plans: {0}")] FindError(String),
 }
-
-impl fmt::Display for FindPlansRepositoryError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.msg)
-    }
-}
-
-impl Error for FindPlansRepositoryError {}
 
 #[async_trait]
 pub trait FindPlansRepository<ReadModel>: Sync {

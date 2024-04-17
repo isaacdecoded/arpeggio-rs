@@ -1,5 +1,4 @@
-use std::fmt;
-use std::error::Error;
+use thiserror::Error;
 use std::time::SystemTime;
 use async_trait::async_trait;
 
@@ -21,18 +20,12 @@ pub struct TodoAddedNotificationRequest {
     pub todo_created_at: SystemTime,
 }
 
-#[derive(Debug)]
-pub struct NotificationServiceError {
-    pub msg: String,
+#[derive(Error, Debug)]
+pub enum NotificationServiceError {
+    #[error("Unable to notify Plan creation: {0}")] NotifyPlanCreatedError(String),
+    #[error("Unable to notify Plan completion: {0}")] NotifyPlanCompletedError(String),
+    #[error("Unable to send Todo details: {0}")] SendTodoDetailsError(String),
 }
-
-impl fmt::Display for NotificationServiceError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.msg)
-    }
-}
-
-impl Error for NotificationServiceError {}
 
 #[async_trait]
 pub trait NotificationService: Sync + Send {

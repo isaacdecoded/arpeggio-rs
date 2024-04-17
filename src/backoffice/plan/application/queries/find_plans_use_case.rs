@@ -1,4 +1,4 @@
-use std::{ error::Error, time::SystemTime };
+use std::time::SystemTime;
 use async_trait::async_trait;
 use crate::{
     backoffice::plan::domain::repositories::find_plans_repository::FindPlansRepository,
@@ -44,30 +44,22 @@ impl<'a> FindPlansUseCase<'a> {
             output_port,
         }
     }
-
-    async fn try_interact(
-        &self,
-        request_model: FindPlansRequestModel
-    ) -> Result<FindPlansResponseModel, Box<dyn Error + Send + Sync>> {
-        let criteria = Criteria {
-            filters: Vec::new(),
-            offset: Some(request_model.offset),
-            limit: Some(request_model.limit),
-        };
-        let plans = self.repository.find(criteria).await?;
-        Ok(FindPlansResponseModel { plans })
-    }
 }
 
 #[async_trait]
 impl<'a> UseCaseInputPort<FindPlansRequestModel> for FindPlansUseCase<'a> {
     async fn interact(&self, request_model: FindPlansRequestModel) {
-        match self.try_interact(request_model).await {
-            Ok(response_model) => {
-                self.output_port.success(response_model).await;
+        let criteria = Criteria {
+            filters: Vec::new(),
+            offset: Some(request_model.offset),
+            limit: Some(request_model.limit),
+        };
+        match self.repository.find(criteria).await {
+            Ok(plans) => {
+                self.output_port.success(FindPlansResponseModel { plans }).await;
             }
             Err(error) => {
-                self.output_port.failure(error).await;
+                self.output_port.failure(error.into()).await;
             }
         }
     }

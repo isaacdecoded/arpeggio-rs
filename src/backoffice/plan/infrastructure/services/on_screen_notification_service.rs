@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use chrono::{ DateTime, Local };
 use crate::backoffice::plan::domain::services::notification_service::{
     NotificationService,
     PlanCreatedNotificationRequest,
@@ -15,11 +16,12 @@ impl NotificationService for OnScreenNotificationService {
         &self,
         request: PlanCreatedNotificationRequest
     ) -> Result<(), NotificationServiceError> {
+        let datetime: DateTime<Local> = request.plan_created_at.into();
         println!("===");
         println!(
-            "OnScreenNotificationService: [Notification] PLAN CREATED:\nContent: Plan <{}> has been created at <{:?}>.",
+            "OnScreenNotificationService: [Notification] PLAN CREATED:\nContent: Plan <{}> has been created at <{}>.",
             request.plan_name,
-            request.plan_created_at
+            datetime.format("%Y-%m-%d %H:%M:%S")
         );
         println!("===");
         Ok(())
@@ -29,11 +31,12 @@ impl NotificationService for OnScreenNotificationService {
         &self,
         request: PlanCompletedNotificationRequest
     ) -> Result<(), NotificationServiceError> {
+        let datetime: DateTime<Local> = request.plan_completed_at.into();
         println!("===");
         println!(
-            "OnScreenNotificationService: [Notification] PLAN COMPLETED:\nContent: Plan <{}> has been completed at <{:?}>.",
+            "OnScreenNotificationService: [Notification] PLAN COMPLETED:\nContent: Plan <{}> has been completed at <{}>.",
             request.plan_name,
-            request.plan_completed_at
+            datetime.format("%Y-%m-%d %H:%M:%S")
         );
         println!("===");
         Ok(())
@@ -43,11 +46,12 @@ impl NotificationService for OnScreenNotificationService {
         &self,
         request: TodoAddedNotificationRequest
     ) -> Result<(), NotificationServiceError> {
+        let datetime: DateTime<Local> = request.todo_created_at.into();
         println!("===");
         println!(
-            "OnScreenNotificationService: [Notification] TODO ADDED:\nContent: Todo <{}> has been added at <{:?}> with ID <{}>.",
+            "OnScreenNotificationService: [Notification] TODO ADDED:\nContent: Todo <{}> has been added at <{}> with ID <{}>.",
             request.todo_description,
-            request.todo_created_at,
+            datetime.format("%Y-%m-%d %H:%M:%S"),
             request.todo_id
         );
         println!("===");

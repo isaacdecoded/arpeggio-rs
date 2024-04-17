@@ -1,12 +1,10 @@
 use async_trait::async_trait;
 use std::error::Error;
+use thiserror::Error;
 use crate::{
-    backoffice::plan::{
-        application::errors::todo_not_updated_error::TodoNotUpdatedError,
-        domain::{
-            repositories::plan_repository::PlanRepository,
-            value_objects::todo_description::TodoDescription,
-        },
+    backoffice::plan::domain::{
+        repositories::plan_repository::PlanRepository,
+        value_objects::todo_description::TodoDescription,
     },
     core::{
         application::{
@@ -16,6 +14,11 @@ use crate::{
         domain::models::{ identity_object::IdentityObject, value_object::ValueObject },
     },
 };
+
+#[derive(Error, Debug)]
+pub enum UpdateTodoUseCaseError {
+    #[error("Unable to update Todo: {0}")] TodoNotUpdatedError(String),
+}
 
 pub struct UpdateTodoRequestModel {
     pub plan_id: String,
@@ -44,25 +47,23 @@ impl<'a> UpdateTodoUseCase<'a> {
         &self,
         request_model: UpdateTodoRequestModel
     ) -> Result<UpdateTodoResponseModel, Box<dyn Error + Send + Sync>> {
-        let plan_id = IdentityObject::new(request_model.plan_id);
+        let plan_id = IdentityObject::new(request_model.plan_id)?;
         let result = self.repository.get_by_id(&plan_id).await?;
         match result {
             Some(mut plan) => {
-                let todo_id = IdentityObject::new(request_model.todo_id);
+                let todo_id = IdentityObject::new(request_model.todo_id)?;
                 plan.change_todo_description(
                     &todo_id,
-                    &TodoDescription::new(request_model.description)
+                    &TodoDescription::new(request_model.description)?
                 )?;
                 self.repository.save(&plan).await?;
                 Ok(UpdateTodoResponseModel { id: todo_id.get_value().to_string() })
             }
             None => {
                 Err(
-                    Box::new(
-                        TodoNotUpdatedError::new(
-                            format!("Plan with ID <{}> do not exist", plan_id.get_value())
-                        )
-                    )
+                    UpdateTodoUseCaseError::TodoNotUpdatedError(
+                        format!("Plan with ID <{}> do not exist", plan_id.get_value())
+                    ).into()
                 )
             }
         }

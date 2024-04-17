@@ -52,7 +52,7 @@ impl<'a> CreatePlanUseCase<'a> {
         let id = self.repository.generate_id().await?;
         let mut plan = Plan::create(CreatePlanProps {
             id,
-            name: PlanName::new(request_model.name),
+            name: PlanName::new(request_model.name)?,
             todos: None,
         });
         self.domain_event_bus.publish(plan.pull_domain_events()).await?;

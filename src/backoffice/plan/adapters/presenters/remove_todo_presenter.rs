@@ -15,6 +15,6 @@ impl UseCaseOutputPort<RemoveTodoResponseModel> for RemoveTodoPresenter {
     }
 
     async fn failure(&self, error: Box<dyn Error + Send + Sync>) {
-        eprintln!("Unable to remove Todo due to: {}", error);
+        eprintln!("{}", error);
     }
 }

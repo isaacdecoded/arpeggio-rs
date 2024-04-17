@@ -38,7 +38,6 @@ impl DomainEventSubscriber for SendNotificationOnPlanCompletedSubscriber {
             self.notification_service.notify_plan_completed(request).await?;
             return Ok(());
         }
-        Ok(())
-        // Err(Box::new(format!("Invalid domain event type with name {}", domain_event.get_name())))
+        Err(format!("Invalid domain event type with name {}", domain_event.get_name()).into())
     }
 }

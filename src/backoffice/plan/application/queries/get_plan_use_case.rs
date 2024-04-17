@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use std::{ error::Error, time::SystemTime };
+use thiserror::Error;
 use crate::{
     core::{
         application::{
@@ -8,11 +9,13 @@ use crate::{
         },
         domain::models::{ identity_object::IdentityObject, value_object::ValueObject },
     },
-    backoffice::plan::{
-        domain::repositories::get_plan_repository::GetPlanRepository,
-        application::errors::plan_not_found_error::PlanNotFoundError,
-    },
+    backoffice::plan::domain::repositories::get_plan_repository::GetPlanRepository,
 };
+
+#[derive(Error, Debug)]
+pub enum GetPlanUseCaseError {
+    #[error("Unable to get Plan: {0}")] PlanNotFoundError(String),
+}
 
 pub struct GetPlanRequestModel {
     pub id: String,
@@ -57,21 +60,15 @@ impl<'a> GetPlanUseCase<'a> {
         &self,
         request_model: GetPlanRequestModel
     ) -> Result<GetPlanResponseModel, Box<dyn Error + Send + Sync>> {
-        let plan_id = IdentityObject::new(request_model.id);
+        let plan_id = IdentityObject::new(request_model.id)?;
         let result = self.repository.get_by_id(&plan_id).await?;
         match result {
-            Some(plan) => {
-                Ok(GetPlanResponseModel {
-                    plan,
-                })
-            }
+            Some(plan) => { Ok(GetPlanResponseModel { plan }) }
             None => {
                 Err(
-                    Box::new(
-                        PlanNotFoundError::new(
-                            format!("Plan with ID <{}> do not exist", plan_id.get_value())
-                        )
-                    )
+                    GetPlanUseCaseError::PlanNotFoundError(
+                        format!("Plan with ID <{}> do not exist", plan_id.get_value())
+                    ).into()
                 )
             }
         }

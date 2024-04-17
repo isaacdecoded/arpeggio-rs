@@ -1,10 +1,8 @@
 use async_trait::async_trait;
 use std::error::Error;
+use thiserror::Error;
 use crate::{
-    backoffice::plan::{
-        application::errors::todo_not_removed_error::TodoNotRemovedError,
-        domain::repositories::plan_repository::PlanRepository,
-    },
+    backoffice::plan::domain::repositories::plan_repository::PlanRepository,
     core::{
         application::{
             use_case_input_port::UseCaseInputPort,
@@ -13,6 +11,11 @@ use crate::{
         domain::models::{ identity_object::IdentityObject, value_object::ValueObject },
     },
 };
+
+#[derive(Error, Debug)]
+pub enum RemoveTodoUseCaseError {
+    #[error("Unable to remove Todo: {0}")] TodoNotRemovedError(String),
+}
 
 pub struct RemoveTodoRequestModel {
     pub plan_id: String,
@@ -43,22 +46,20 @@ impl<'a> RemoveTodoUseCase<'a> {
         &self,
         request_model: RemoveTodoRequestModel
     ) -> Result<RemoveTodoResponseModel, Box<dyn Error + Send + Sync>> {
-        let plan_id = IdentityObject::new(request_model.plan_id.to_owned());
+        let plan_id = IdentityObject::new(request_model.plan_id.to_owned())?;
         let result = self.repository.get_by_id(&plan_id).await?;
         match result {
             Some(mut plan) => {
-                let todo_id = IdentityObject::new(request_model.todo_id);
+                let todo_id = IdentityObject::new(request_model.todo_id)?;
                 plan.remove_todo(&todo_id)?;
                 self.repository.save(&plan).await?;
                 Ok(RemoveTodoResponseModel { id: todo_id.get_value().to_string() })
             }
             None => {
                 Err(
-                    Box::new(
-                        TodoNotRemovedError::new(
-                            format!("Plan with ID <{}> do not exist", request_model.plan_id)
-                        )
-                    )
+                    RemoveTodoUseCaseError::TodoNotRemovedError(
+                        format!("Plan with ID <{}> do not exist", request_model.plan_id)
+                    ).into()
                 )
             }
         }

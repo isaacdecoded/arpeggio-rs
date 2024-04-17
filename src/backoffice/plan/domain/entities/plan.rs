@@ -1,6 +1,5 @@
-use std::error::Error;
-use std::time::SystemTime;
 use thiserror::Error;
+use std::time::SystemTime;
 use crate::backoffice::plan::domain::value_objects::todo_description::TodoDescription;
 use crate::core::domain::models::{
     aggregate_root::AggregateRoot,
@@ -44,8 +43,11 @@ pub struct Plan {
 
 #[derive(Error, Debug)]
 pub enum PlanError {
-    #[error("Unable to get entity by ID: {0}")] GetByIdError(String),
-    #[error("Unable to save entity: {0}")] SaveError(String),
+    #[error("Unable to get Todo: {0}")] GetTodo(String),
+    #[error("Unable to process Todo: {0}")] ValidateDescriptionError(String),
+    #[error("Unable to add Todo: {0}")] AddTodoError(String),
+    #[error("Unable to remove Todo: {0}")] RemoveTodoError(String),
+    #[error("Unable to mark Todo as done: {0}")] MarkTodoAsDoneError(String),
 }
 
 impl Plan {
@@ -105,9 +107,11 @@ impl Plan {
         Ok(())
     }
 
-    pub fn remove_todo(&mut self, id: &IdentityObject) -> Result<(), Box<dyn Error + Send + Sync>> {
+    pub fn remove_todo(&mut self, id: &IdentityObject) -> Result<(), PlanError> {
         if self.is_completed() {
-            return Err("This Plan aggregation's lifecycle is completed".into());
+            return Err(
+                PlanError::RemoveTodoError("This Plan aggregation's lifecycle is completed".into())
+            );
         }
         let todo = self.get_todo(id)?;
         todo.change_status(TodoStatus::REMOVED);
@@ -119,7 +123,7 @@ impl Plan {
         &mut self,
         id: &IdentityObject,
         description: &TodoDescription
-    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+    ) -> Result<(), PlanError> {
         self.validate_description_duplication(description)?;
         let todo = self.get_todo(id)?;
         todo.change_description(description);
@@ -127,10 +131,7 @@ impl Plan {
         Ok(())
     }
 
-    pub fn mark_todo_as_done(
-        &mut self,
-        id: &IdentityObject
-    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+    pub fn mark_todo_as_done(&mut self, id: &IdentityObject) -> Result<(), PlanError> {
         let todo = self.get_todo(id)?;
         todo.change_status(TodoStatus::DONE);
         self.update();
@@ -157,28 +158,22 @@ impl Plan {
             .any(|t| t.get_description() == description.get_value());
         if description_already_exist {
             return Err(
-                PlanError::GetByIdError(
+                PlanError::ValidateDescriptionError(
                     format!(
-                        "Todo with the same description already exist: {}",
+                        "Todo with the same description already exists: {}",
                         description.get_value()
                     )
                 )
             );
-            /*return Err(
-                format!(
-                    "Todo with the same description already exist: {}",
-                    description.get_value()
-                ).into()
-            );*/
         }
         Ok(())
     }
 
-    fn get_todo(&mut self, id: &IdentityObject) -> Result<&mut Todo, Box<dyn Error + Send + Sync>> {
+    fn get_todo(&mut self, id: &IdentityObject) -> Result<&mut Todo, PlanError> {
         let result = self.todos.iter_mut().find(|t| t.get_id().is_equal(id));
         match result {
             Some(todo) => Ok(todo),
-            None => Err("Todo not found in current Plan aggregation".into()),
+            None => Err(PlanError::GetTodo("Todo not found in current Plan aggregation".into())),
         }
     }
 }
@@ -207,7 +202,6 @@ impl Entity<IdentityObject> for Plan {
     }
 
     fn update(&mut self) {
-        // let a = self.a();
         self.updated_at = Some(DateValueObject::now());
     }
 }

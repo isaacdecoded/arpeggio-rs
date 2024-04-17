@@ -36,6 +36,6 @@ impl DomainEventSubscriber for SendNotificationOnPlanCreatedSubscriber {
             self.notification_service.notify_plan_created(request).await?;
             return Ok(());
         }
-        Err(Box::from(format!("Invalid domain event type with name {}", domain_event.get_name())))
+        Err(format!("Invalid domain event type with name {}", domain_event.get_name()).into())
     }
 }

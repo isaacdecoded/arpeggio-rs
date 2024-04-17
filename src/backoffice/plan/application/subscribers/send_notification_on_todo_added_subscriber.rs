@@ -40,6 +40,6 @@ impl DomainEventSubscriber for SendNotificationOnTodoAddedSubscriber {
             self.notification_service.send_new_todo_details(request).await?;
             return Ok(());
         }
-        Err(Box::from(format!("Invalid domain event type with name {}", domain_event.get_name())))
+        Err(format!("Invalid domain event type with name {}", domain_event.get_name()).into())
     }
 }

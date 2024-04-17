@@ -26,8 +26,9 @@ impl GetPlanRepository<GetPlanReadModel> for InMemoryGetPlanRepository {
         id: &IdentityObject
     ) -> Result<Option<GetPlanReadModel>, GetPlanRepositoryError> {
         let id_value = id.get_value();
-        let result = self.in_memory_repository.read_plans.read().unwrap();
-        // let plan_model = self.read_plans.read().unwrap().get(id.get_value());
+        let result = self.in_memory_repository.read_plans
+            .read()
+            .map_err(|e| GetPlanRepositoryError::GetByIdError(e.to_string()))?;
         match result.get(id_value) {
             Some(plan_model) => {
                 let todos = plan_model.todos
