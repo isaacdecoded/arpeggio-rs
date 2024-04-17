@@ -1,4 +1,4 @@
-use std::time::SystemTime;
+use std::{ error::Error, time::SystemTime };
 use crate::core::domain::models::value_object::ValueObject;
 
 #[derive(Copy, Clone, PartialEq)]
@@ -7,8 +7,8 @@ pub struct DateValueObject {
 }
 
 impl ValueObject<SystemTime> for DateValueObject {
-    fn new(value: SystemTime) -> Self {
-        DateValueObject { value }
+    fn new(value: SystemTime) -> Result<Self, Box<dyn Error + Sync + Send>> {
+        Ok(DateValueObject { value })
     }
 
     fn get_value(&self) -> &SystemTime {
@@ -22,7 +22,7 @@ impl ValueObject<SystemTime> for DateValueObject {
 
 impl DateValueObject {
     pub fn now() -> Self {
-        DateValueObject::new(SystemTime::now())
+        DateValueObject::new(SystemTime::now()).unwrap()
     }
 }
 
@@ -37,7 +37,7 @@ mod tests {
     #[test]
     fn should_initialize_valid_instance() {
         let value = SystemTime::now();
-        let vo = DateValueObject::new(value);
+        let vo = DateValueObject::new(value).unwrap();
         assert_eq!(vo.get_value().to_owned(), value);
     }
 }

@@ -1,4 +1,4 @@
-use std::fmt;
+use std::{ error::Error, fmt };
 use crate::core::domain::models::value_object::ValueObject;
 
 #[derive(Clone)]
@@ -13,8 +13,8 @@ impl fmt::Display for IdentityObject {
 }
 
 impl ValueObject<String> for IdentityObject {
-    fn new(value: String) -> Self {
-        Self { value }
+    fn new(value: String) -> Result<Self, Box<dyn Error + Sync + Send>> {
+        Ok(Self { value })
     }
 
     fn get_value(&self) -> &String {
@@ -33,7 +33,7 @@ mod tests {
     #[test]
     fn should_initialize_valid_instance() {
         let value = "identity_value".to_string();
-        let vo = IdentityObject::new(value);
+        let vo = IdentityObject::new(value).unwrap();
         assert_eq!(vo.get_value().to_string(), "identity_value".to_string());
     }
 }
