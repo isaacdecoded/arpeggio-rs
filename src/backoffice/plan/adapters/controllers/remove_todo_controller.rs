@@ -1,5 +1,4 @@
 use async_trait::async_trait;
-use std::error::Error;
 use crate::{
     backoffice::plan::application::commands::remove_todo_use_case::{
         RemoveTodoUseCase,
@@ -26,7 +25,7 @@ impl<'a> RemoveTodoController<'a> {
 
 #[async_trait]
 impl<'a> Controller<RemoveTodoRequestObject> for RemoveTodoController<'a> {
-    async fn execute(&self, request_object: RemoveTodoRequestObject) -> Result<(), Box<dyn Error>> {
+    async fn execute(&self, request_object: RemoveTodoRequestObject) {
         self.use_case.interact(RemoveTodoRequestModel {
             plan_id: request_object.plan_id,
             todo_id: request_object.todo_id,

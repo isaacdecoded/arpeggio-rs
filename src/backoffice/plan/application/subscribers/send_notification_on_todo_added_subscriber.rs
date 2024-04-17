@@ -29,7 +29,7 @@ impl DomainEventSubscriber for SendNotificationOnTodoAddedSubscriber {
         TodoAddedDomainEvent::name()
     }
 
-    async fn on(&self, domain_event: &dyn DomainEvent) -> Result<(), Box<dyn Error>> {
+    async fn on(&self, domain_event: &dyn DomainEvent) -> Result<(), Box<dyn Error + Send + Sync>> {
         let todo_created_option = domain_event.as_any().downcast_ref::<TodoAddedDomainEvent>();
         if let Some(todo_created) = todo_created_option {
             let request = TodoAddedNotificationRequest {

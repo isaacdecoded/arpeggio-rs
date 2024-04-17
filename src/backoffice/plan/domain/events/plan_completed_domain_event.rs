@@ -1,12 +1,12 @@
 use std::any::Any;
-use chrono::{ Local, DateTime };
+use std::time::SystemTime;
 use crate::core::domain::models::entity::Entity;
 use crate::core::domain::events::domain_event::DomainEvent;
 use crate::backoffice::plan::domain::entities::plan::Plan;
 
 pub struct PlanCompletedDomainEvent {
     aggregate_root_id: String,
-    occurring_time: DateTime<Local>,
+    occurring_time: SystemTime,
     plan_name: String,
 }
 
@@ -14,7 +14,7 @@ impl PlanCompletedDomainEvent {
     pub fn new(plan: &Plan) -> Self {
         Self {
             aggregate_root_id: plan.get_id().to_string(),
-            occurring_time: Local::now(),
+            occurring_time: SystemTime::now(),
             plan_name: plan.get_name().to_string(),
         }
     }
@@ -37,7 +37,7 @@ impl DomainEvent for PlanCompletedDomainEvent {
         &self.aggregate_root_id
     }
 
-    fn get_occurring_time(&self) -> &DateTime<Local> {
+    fn get_occurring_time(&self) -> &SystemTime {
         &self.occurring_time
     }
 

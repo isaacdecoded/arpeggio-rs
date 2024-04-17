@@ -5,10 +5,17 @@ pub struct TodoDescription {
     value: String,
 }
 
+impl TodoDescription {
+    const MAX_LENGTH: usize = 1200;
+}
+
 impl ValueObject<String> for TodoDescription {
     fn new(value: String) -> Self {
-        if value.len() > 1200 {
-            panic!("The description exceeds the maximum length of 500 characters.");
+        if value.len() > Self::MAX_LENGTH {
+            panic!(
+                "The description exceeds the maximum length of {} characters.",
+                Self::MAX_LENGTH
+            );
         }
         TodoDescription { value }
     }

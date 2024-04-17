@@ -51,11 +51,11 @@ impl<'a> AddTodoUseCase<'a> {
             domain_event_bus,
         }
     }
-}
 
-#[async_trait]
-impl<'a> UseCaseInputPort<AddTodoRequestModel> for AddTodoUseCase<'a> {
-    async fn interact(&self, request_model: AddTodoRequestModel) -> Result<(), Box<dyn Error>> {
+    async fn try_interact(
+        &self,
+        request_model: AddTodoRequestModel
+    ) -> Result<AddTodoResponseModel, Box<dyn Error + Send + Sync>> {
         let plan_id = IdentityObject::new(request_model.plan_id);
         let result = self.repository.get_by_id(&plan_id).await?;
         match result {
@@ -65,23 +65,32 @@ impl<'a> UseCaseInputPort<AddTodoRequestModel> for AddTodoUseCase<'a> {
                 plan.add_todo(&id, &description)?;
                 self.repository.save(&plan).await?;
                 self.domain_event_bus.publish(plan.pull_domain_events()).await?;
-                self.output_port.success(AddTodoResponseModel {
+                Ok(AddTodoResponseModel {
                     id: id.get_value().to_string(),
-                }).await?;
-                Ok(())
+                })
             }
             None => {
-                self.output_port.failure(
+                Err(
                     Box::new(
                         TodoNotAddedError::new(
-                            format!(
-                                "Plan with ID <{}> do not exist",
-                                plan_id.get_value().to_string()
-                            )
+                            format!("Plan with ID <{}> do not exist", plan_id.get_value())
                         )
                     )
-                ).await?;
-                Ok(())
+                )
+            }
+        }
+    }
+}
+
+#[async_trait]
+impl<'a> UseCaseInputPort<AddTodoRequestModel> for AddTodoUseCase<'a> {
+    async fn interact(&self, request_model: AddTodoRequestModel) {
+        match self.try_interact(request_model).await {
+            Ok(response_model) => {
+                self.output_port.success(response_model).await;
+            }
+            Err(error) => {
+                self.output_port.failure(error).await;
             }
         }
     }

@@ -17,17 +17,15 @@ impl CreatePlanPresenter {
 
 #[async_trait]
 impl UseCaseOutputPort<CreatePlanResponseModel> for CreatePlanPresenter {
-    async fn success(&self, response_model: CreatePlanResponseModel) -> Result<(), Box<dyn Error>> {
+    async fn success(&self, response_model: CreatePlanResponseModel) {
         let id = response_model.id;
         println!("===");
         println!("Plan with ID <{}> successfully created.", id);
         println!("===");
         (self.plan_id_catcher)(id);
-        Ok(())
     }
 
-    async fn failure(&self, error: Box<dyn Error + Send>) -> Result<(), Box<dyn Error>> {
-        eprintln!("{}", error.to_string());
-        Ok(())
+    async fn failure(&self, error: Box<dyn Error + Send + Sync>) {
+        eprintln!("{}", error);
     }
 }

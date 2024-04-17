@@ -1,5 +1,4 @@
 use async_trait::async_trait;
-use std::error::Error;
 use crate::{
     backoffice::plan::application::queries::find_plans_use_case::{
         FindPlansUseCase,
@@ -27,7 +26,7 @@ impl<'a> FindPlansController<'a> {
 
 #[async_trait]
 impl<'a> Controller<FindPlansRequestObject> for FindPlansController<'a> {
-    async fn execute(&self, request_object: FindPlansRequestObject) -> Result<(), Box<dyn Error>> {
+    async fn execute(&self, request_object: FindPlansRequestObject) {
         self.use_case.interact(FindPlansRequestModel {
             name: request_object.name,
             offset: request_object.offset,

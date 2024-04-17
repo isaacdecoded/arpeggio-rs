@@ -34,9 +34,9 @@ use crate::backoffice::{
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     // Prepare the Domain Event Bus
-    let mut domain_event_bus = InMemoryDomainEventBus::new();
+    let mut domain_event_bus = InMemoryDomainEventBus::default();
     let notification_service: Arc<dyn NotificationService> = Arc::new(
-        OnScreenNotificationService::new()
+        OnScreenNotificationService
     );
     let send_notification_on_plan_created_subscriber: Box<
         dyn DomainEventSubscriber
@@ -67,29 +67,34 @@ async fn main() -> Result<(), Box<dyn Error>> {
         name: None,
     }).await;
 
+    let plan_id = backoffice_context.plan_aggregate.caught_plan_id.lock().unwrap().to_string();
     backoffice_context.plan_aggregate.add_todo(AddTodoRequestObject {
-        plan_id: backoffice_context.plan_aggregate.caught_plan_id.lock().unwrap().to_string(),
+        plan_id: plan_id.clone(),
         description: "My First Todo".to_string(),
     }).await;
 
+    let todo_id = backoffice_context.plan_aggregate.caught_todo_id.lock().unwrap().to_string();
     backoffice_context.plan_aggregate.update_todo(UpdateTodoRequestObject {
-        plan_id: backoffice_context.plan_aggregate.caught_plan_id.lock().unwrap().to_string(),
-        todo_id: backoffice_context.plan_aggregate.caught_todo_id.lock().unwrap().to_string(),
+        plan_id: plan_id.clone(),
+        todo_id: todo_id.clone(),
         description: "My First Todo (Updated)".to_string(),
     }).await;
 
+    let plan_id = backoffice_context.plan_aggregate.caught_plan_id.lock().unwrap().to_string();
+    let todo_id = backoffice_context.plan_aggregate.caught_todo_id.lock().unwrap().to_string();
+
     backoffice_context.plan_aggregate.check_todo(CheckTodoRequestObject {
-        plan_id: backoffice_context.plan_aggregate.caught_plan_id.lock().unwrap().to_string(),
-        todo_id: backoffice_context.plan_aggregate.caught_todo_id.lock().unwrap().to_string(),
+        plan_id: plan_id.clone(),
+        todo_id: todo_id.clone(),
     }).await;
 
     backoffice_context.plan_aggregate.get_plan(GetPlanRequestObject {
-        id: backoffice_context.plan_aggregate.caught_plan_id.lock().unwrap().to_string(),
+        id: plan_id.clone(),
     }).await;
 
     backoffice_context.plan_aggregate.remove_todo(RemoveTodoRequestObject {
-        plan_id: backoffice_context.plan_aggregate.caught_plan_id.lock().unwrap().to_string(),
-        todo_id: backoffice_context.plan_aggregate.caught_todo_id.lock().unwrap().to_string(),
+        plan_id: plan_id.clone(),
+        todo_id: todo_id.clone(),
     }).await;
     Ok(())
 }

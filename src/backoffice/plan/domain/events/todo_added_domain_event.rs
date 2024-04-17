@@ -1,5 +1,5 @@
 use std::any::Any;
-use chrono::{ Local, DateTime };
+use std::time::SystemTime;
 use crate::{
     backoffice::plan::domain::entities::todo::Todo,
     core::domain::{ events::domain_event::DomainEvent, models::entity::Entity },
@@ -8,16 +8,16 @@ use crate::{
 #[derive(Clone)]
 pub struct TodoAddedDomainEvent {
     aggregate_root_id: String,
-    occurring_time: DateTime<Local>,
+    occurring_time: SystemTime,
     todo_description: String,
-    todo_added_at: DateTime<Local>,
+    todo_added_at: SystemTime,
 }
 
 impl TodoAddedDomainEvent {
     pub fn new(todo: &Todo) -> Box<Self> {
         Box::new(Self {
             aggregate_root_id: todo.get_id().to_string(),
-            occurring_time: Local::now(),
+            occurring_time: SystemTime::now(),
             todo_description: todo.get_description().to_string(),
             todo_added_at: todo.get_created_at().to_owned(),
         })
@@ -31,7 +31,7 @@ impl TodoAddedDomainEvent {
         &self.todo_description
     }
 
-    pub fn get_todo_added_at(&self) -> &DateTime<Local> {
+    pub fn get_todo_added_at(&self) -> &SystemTime {
         &self.todo_added_at
     }
 }
@@ -45,7 +45,7 @@ impl DomainEvent for TodoAddedDomainEvent {
         &self.aggregate_root_id
     }
 
-    fn get_occurring_time(&self) -> &DateTime<Local> {
+    fn get_occurring_time(&self) -> &SystemTime {
         &self.occurring_time
     }
 

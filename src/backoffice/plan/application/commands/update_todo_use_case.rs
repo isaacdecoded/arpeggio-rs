@@ -9,7 +9,10 @@ use crate::{
         },
     },
     core::{
-        application::use_case_input_port::UseCaseInputPort,
+        application::{
+            use_case_input_port::UseCaseInputPort,
+            use_case_output_port::UseCaseOutputPort,
+        },
         domain::models::{ identity_object::IdentityObject, value_object::ValueObject },
     },
 };
@@ -21,32 +24,37 @@ pub struct UpdateTodoRequestModel {
 }
 
 pub struct UpdateTodoResponseModel {
-    pub id: IdentityObject,
+    pub id: String,
 }
 
 pub struct UpdateTodoUseCase<'a> {
     repository: &'a dyn PlanRepository,
+    output_port: &'a dyn UseCaseOutputPort<UpdateTodoResponseModel>,
 }
 
 impl<'a> UpdateTodoUseCase<'a> {
-    pub fn new(repository: &'a dyn PlanRepository) -> Self {
-        Self { repository }
+    pub fn new(
+        repository: &'a dyn PlanRepository,
+        output_port: &'a dyn UseCaseOutputPort<UpdateTodoResponseModel>
+    ) -> Self {
+        Self { repository, output_port }
     }
-}
 
-#[async_trait]
-impl<'a> UseCaseInputPort<UpdateTodoRequestModel> for UpdateTodoUseCase<'a> {
-    async fn interact(&self, request_model: UpdateTodoRequestModel) -> Result<(), Box<dyn Error>> {
+    async fn try_interact(
+        &self,
+        request_model: UpdateTodoRequestModel
+    ) -> Result<UpdateTodoResponseModel, Box<dyn Error + Send + Sync>> {
         let plan_id = IdentityObject::new(request_model.plan_id);
         let result = self.repository.get_by_id(&plan_id).await?;
         match result {
             Some(mut plan) => {
+                let todo_id = IdentityObject::new(request_model.todo_id);
                 plan.change_todo_description(
-                    &IdentityObject::new(request_model.todo_id),
+                    &todo_id,
                     &TodoDescription::new(request_model.description)
                 )?;
                 self.repository.save(&plan).await?;
-                Ok(())
+                Ok(UpdateTodoResponseModel { id: todo_id.get_value().to_string() })
             }
             None => {
                 Err(
@@ -56,6 +64,20 @@ impl<'a> UseCaseInputPort<UpdateTodoRequestModel> for UpdateTodoUseCase<'a> {
                         )
                     )
                 )
+            }
+        }
+    }
+}
+
+#[async_trait]
+impl<'a> UseCaseInputPort<UpdateTodoRequestModel> for UpdateTodoUseCase<'a> {
+    async fn interact(&self, request_model: UpdateTodoRequestModel) {
+        match self.try_interact(request_model).await {
+            Ok(response_model) => {
+                self.output_port.success(response_model).await;
+            }
+            Err(error) => {
+                self.output_port.failure(error).await;
             }
         }
     }

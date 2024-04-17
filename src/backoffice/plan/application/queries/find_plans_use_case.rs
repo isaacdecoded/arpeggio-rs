@@ -1,6 +1,5 @@
+use std::{ error::Error, time::SystemTime };
 use async_trait::async_trait;
-use std::error::Error;
-use chrono::{ DateTime, Local };
 use crate::{
     backoffice::plan::domain::repositories::find_plans_repository::FindPlansRepository,
     core::{
@@ -22,8 +21,8 @@ pub struct FindPlansReadModel {
     pub id: String,
     pub name: String,
     pub todo_count: usize,
-    pub created_at: DateTime<Local>,
-    pub updated_at: Option<DateTime<Local>>,
+    pub created_at: SystemTime,
+    pub updated_at: Option<SystemTime>,
 }
 
 pub struct FindPlansResponseModel {
@@ -45,23 +44,31 @@ impl<'a> FindPlansUseCase<'a> {
             output_port,
         }
     }
-}
 
-#[async_trait]
-impl<'a> UseCaseInputPort<FindPlansRequestModel> for FindPlansUseCase<'a> {
-    async fn interact(&self, request_model: FindPlansRequestModel) -> Result<(), Box<dyn Error>> {
+    async fn try_interact(
+        &self,
+        request_model: FindPlansRequestModel
+    ) -> Result<FindPlansResponseModel, Box<dyn Error + Send + Sync>> {
         let criteria = Criteria {
-            // TODO: Implement filters
-            // name: request_model.name,
             filters: Vec::new(),
             offset: Some(request_model.offset),
             limit: Some(request_model.limit),
         };
         let plans = self.repository.find(criteria).await?;
-        self.output_port.success(FindPlansResponseModel { plans }).await?;
-        Ok(())
-        /*Err(error) => {
-            self.output_port.failure(Box::new(error)).await;
-        }*/
+        Ok(FindPlansResponseModel { plans })
+    }
+}
+
+#[async_trait]
+impl<'a> UseCaseInputPort<FindPlansRequestModel> for FindPlansUseCase<'a> {
+    async fn interact(&self, request_model: FindPlansRequestModel) {
+        match self.try_interact(request_model).await {
+            Ok(response_model) => {
+                self.output_port.success(response_model).await;
+            }
+            Err(error) => {
+                self.output_port.failure(error).await;
+            }
+        }
     }
 }

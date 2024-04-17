@@ -1,24 +1,24 @@
 use std::fmt;
 use std::error::Error;
+use std::time::SystemTime;
 use async_trait::async_trait;
-use chrono::{ DateTime, Local };
 
 pub struct PlanCreatedNotificationRequest {
     pub plan_id: String,
     pub plan_name: String,
-    pub plan_created_at: DateTime<Local>,
+    pub plan_created_at: SystemTime,
 }
 
 pub struct PlanCompletedNotificationRequest {
     pub plan_id: String,
     pub plan_name: String,
-    pub plan_completed_at: DateTime<Local>,
+    pub plan_completed_at: SystemTime,
 }
 
 pub struct TodoAddedNotificationRequest {
     pub todo_id: String,
     pub todo_description: String,
-    pub todo_created_at: DateTime<Local>,
+    pub todo_created_at: SystemTime,
 }
 
 #[derive(Debug)]

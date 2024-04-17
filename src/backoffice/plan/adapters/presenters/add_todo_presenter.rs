@@ -17,17 +17,15 @@ impl AddTodoPresenter {
 
 #[async_trait]
 impl UseCaseOutputPort<AddTodoResponseModel> for AddTodoPresenter {
-    async fn success(&self, response_model: AddTodoResponseModel) -> Result<(), Box<dyn Error>> {
+    async fn success(&self, response_model: AddTodoResponseModel) {
         let id = response_model.id;
         println!("===");
         println!("AddTodoPresenter: Todo with ID <{}> successfully added.", id);
         println!("===");
         (self.todo_id_catcher)(id);
-        Ok(())
     }
 
-    async fn failure(&self, error: Box<dyn Error + Send>) -> Result<(), Box<dyn Error>> {
-        eprintln!("{}", error.to_string());
-        Ok(())
+    async fn failure(&self, error: Box<dyn Error + Send + Sync>) {
+        eprintln!("{}", error);
     }
 }

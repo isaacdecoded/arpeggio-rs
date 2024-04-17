@@ -1,5 +1,4 @@
 use async_trait::async_trait;
-use std::error::Error;
 use crate::core::{
     adapters::controller::Controller,
     application::use_case_input_port::UseCaseInputPort,
@@ -26,7 +25,7 @@ impl<'a> CheckTodoController<'a> {
 
 #[async_trait]
 impl<'a> Controller<CheckTodoRequestObject> for CheckTodoController<'a> {
-    async fn execute(&self, request_object: CheckTodoRequestObject) -> Result<(), Box<dyn Error>> {
+    async fn execute(&self, request_object: CheckTodoRequestObject) {
         self.use_case.interact(CheckTodoRequestModel {
             plan_id: request_object.plan_id,
             todo_id: request_object.todo_id,

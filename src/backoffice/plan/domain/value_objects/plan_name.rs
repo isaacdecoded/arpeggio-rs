@@ -5,10 +5,14 @@ pub struct PlanName {
     value: String,
 }
 
+impl PlanName {
+    const MAX_LENGTH: usize = 512;
+}
+
 impl ValueObject<String> for PlanName {
     fn new(value: String) -> Self {
-        if value.len() > 500 {
-            panic!("The name exceeds the maximum length of 500 characters.");
+        if value.len() > Self::MAX_LENGTH {
+            panic!("The name exceeds the maximum length of {} characters.", Self::MAX_LENGTH);
         }
         Self { value }
     }

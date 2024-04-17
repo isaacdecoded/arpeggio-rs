@@ -11,20 +11,25 @@ use crate::backoffice::plan::application::{
     },
     queries::{ find_plans_use_case::FindPlansUseCase, get_plan_use_case::GetPlanUseCase },
 };
-use crate::backoffice::plan::adapters::controllers::{
-    create_plan_controller::{ CreatePlanController, CreatePlanRequestObject },
-    find_plans_controller::{ FindPlansController, FindPlansRequestObject },
-    get_plan_controller::{ GetPlanController, GetPlanRequestObject },
-    add_todo_controller::{ AddTodoController, AddTodoRequestObject },
-    update_todo_controller::{ UpdateTodoController, UpdateTodoRequestObject },
-    remove_todo_controller::{ RemoveTodoController, RemoveTodoRequestObject },
-    check_todo_controller::{ CheckTodoController, CheckTodoRequestObject },
-};
-use crate::backoffice::plan::adapters::presenters::{
-    create_plan_presenter::CreatePlanPresenter,
-    find_plans_presenter::FindPlansPresenter,
-    get_plan_presenter::GetPlanPresenter,
-    add_todo_presenter::AddTodoPresenter,
+use crate::backoffice::plan::adapters::{
+    controllers::{
+        create_plan_controller::{ CreatePlanController, CreatePlanRequestObject },
+        find_plans_controller::{ FindPlansController, FindPlansRequestObject },
+        get_plan_controller::{ GetPlanController, GetPlanRequestObject },
+        add_todo_controller::{ AddTodoController, AddTodoRequestObject },
+        update_todo_controller::{ UpdateTodoController, UpdateTodoRequestObject },
+        remove_todo_controller::{ RemoveTodoController, RemoveTodoRequestObject },
+        check_todo_controller::{ CheckTodoController, CheckTodoRequestObject },
+    },
+    presenters::{
+        add_todo_presenter::AddTodoPresenter,
+        check_todo_presenter::CheckTodoPresenter,
+        create_plan_presenter::CreatePlanPresenter,
+        find_plans_presenter::FindPlansPresenter,
+        get_plan_presenter::GetPlanPresenter,
+        remove_todo_presenter::RemoveTodoPresenter,
+        update_todo_presenter::UpdateTodoPresenter,
+    },
 };
 use crate::backoffice::plan::infrastructure::repositories::{
     in_memory_find_plans_repository::InMemoryFindPlansRepository,
@@ -60,23 +65,23 @@ impl<'a> PlanAggregate<'a> {
             find_plans_repository,
             get_plan_repository,
             plan_repository,
-            caught_plan_id: caught_plan_id,
-            caught_todo_id: caught_todo_id,
+            caught_plan_id,
+            caught_todo_id,
         }
     }
 
     pub async fn get_plan(&self, request_object: GetPlanRequestObject) {
-        let presenter = GetPlanPresenter::new();
+        let presenter = GetPlanPresenter;
         let use_case = GetPlanUseCase::new(&self.get_plan_repository, &presenter);
         let controller = GetPlanController::new(&use_case);
-        let _ = controller.execute(request_object).await;
+        controller.execute(request_object).await;
     }
 
     pub async fn find_plans(&self, request_object: FindPlansRequestObject) {
-        let presenter = FindPlansPresenter::new();
+        let presenter = FindPlansPresenter;
         let use_case = FindPlansUseCase::new(&self.find_plans_repository, &presenter);
         let controller = FindPlansController::new(use_case);
-        let _ = controller.execute(request_object).await;
+        controller.execute(request_object).await;
     }
 
     pub async fn create_plan(&self, request_object: CreatePlanRequestObject) {
@@ -92,7 +97,7 @@ impl<'a> PlanAggregate<'a> {
             &presenter
         );
         let controller = CreatePlanController::new(use_case);
-        let _ = controller.execute(request_object).await;
+        controller.execute(request_object).await;
     }
 
     pub async fn add_todo(&self, request_object: AddTodoRequestObject) {
@@ -108,32 +113,30 @@ impl<'a> PlanAggregate<'a> {
             &presenter
         );
         let controller = AddTodoController::new(use_case);
-        let _ = controller.execute(request_object).await;
+        controller.execute(request_object).await;
     }
 
     pub async fn update_todo(&self, request_object: UpdateTodoRequestObject) {
-        let use_case = UpdateTodoUseCase::new(&self.plan_repository);
+        let presenter = UpdateTodoPresenter;
+        let use_case = UpdateTodoUseCase::new(&self.plan_repository, &presenter);
         let controller = UpdateTodoController::new(use_case);
-        let _ = controller.execute(request_object).await;
+        controller.execute(request_object).await;
     }
 
     pub async fn remove_todo(&self, request_object: RemoveTodoRequestObject) {
-        let use_case = RemoveTodoUseCase::new(&self.plan_repository);
+        let presenter = RemoveTodoPresenter;
+        let use_case = RemoveTodoUseCase::new(&self.plan_repository, &presenter);
         let controller = RemoveTodoController::new(use_case);
-        let result = controller.execute(request_object).await;
-        match result {
-            Ok(_) => {}
-            Err(e) => {
-                println!("===");
-                eprintln!("Error: {:?}", e);
-                println!("(Error caused on purpose to test Plan Aggregate's consistency policies)");
-                println!("===");
-            }
-        }
+        controller.execute(request_object).await;
     }
 
     pub async fn check_todo(&self, request_object: CheckTodoRequestObject) {
-        let use_case = CheckTodoUseCase::new(&self.plan_repository, self.domain_event_bus);
+        let presenter = CheckTodoPresenter;
+        let use_case = CheckTodoUseCase::new(
+            &self.plan_repository,
+            self.domain_event_bus,
+            &presenter
+        );
         let controller = CheckTodoController::new(use_case);
         let _ = controller.execute(request_object).await;
     }

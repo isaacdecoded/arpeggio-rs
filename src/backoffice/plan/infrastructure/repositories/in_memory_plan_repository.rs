@@ -66,19 +66,13 @@ impl InMemoryPlanRepository {
                             description: TodoDescription::new(todo.description.to_string()),
                             status: TodoStatus::from_str(&todo.status).unwrap(),
                             created_at: DateValueObject::new(todo.created_at),
-                            updated_at: match todo.updated_at {
-                                Some(updated_at) => Some(DateValueObject::new(updated_at)),
-                                None => None,
-                            },
+                            updated_at: todo.updated_at.map(DateValueObject::new),
                         })
                     })
                     .collect()
             ),
             created_at: DateValueObject::new(model.created_at),
-            updated_at: match model.updated_at {
-                Some(updated_at) => Some(DateValueObject::new(updated_at)),
-                None => None,
-            },
+            updated_at: model.updated_at.map(DateValueObject::new),
         })
     }
 }
