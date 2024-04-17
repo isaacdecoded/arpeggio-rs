@@ -35,9 +35,7 @@ use crate::backoffice::{
 async fn main() -> Result<(), Box<dyn Error>> {
     // Prepare the Domain Event Bus
     let mut domain_event_bus = InMemoryDomainEventBus::default();
-    let notification_service: Arc<dyn NotificationService> = Arc::new(
-        OnScreenNotificationService
-    );
+    let notification_service: Arc<dyn NotificationService> = Arc::new(OnScreenNotificationService);
     let send_notification_on_plan_created_subscriber: Box<
         dyn DomainEventSubscriber
     > = SendNotificationOnPlanCreatedSubscriber::new(Arc::clone(&notification_service));
