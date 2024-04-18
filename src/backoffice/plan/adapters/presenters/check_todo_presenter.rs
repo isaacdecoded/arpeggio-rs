@@ -8,7 +8,7 @@ pub struct CheckTodoPresenter;
 #[async_trait]
 impl UseCaseOutputPort<CheckTodoResponseModel> for CheckTodoPresenter {
     async fn success(&self, response_model: CheckTodoResponseModel) {
-        let id = response_model.id;
+        let id = response_model.todo_id;
         println!("===");
         println!("CheckTodoPresenter: Todo with ID <{}> successfully checked.", id);
         println!("===");

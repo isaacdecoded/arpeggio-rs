@@ -8,7 +8,7 @@ pub struct RemoveTodoPresenter;
 #[async_trait]
 impl UseCaseOutputPort<RemoveTodoResponseModel> for RemoveTodoPresenter {
     async fn success(&self, response_model: RemoveTodoResponseModel) {
-        let id = response_model.id;
+        let id = response_model.todo_id;
         println!("===");
         println!("RemoveTodoPresenter: Todo with ID <{}> successfully removed.", id);
         println!("===");

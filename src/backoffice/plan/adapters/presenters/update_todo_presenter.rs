@@ -8,7 +8,7 @@ pub struct UpdateTodoPresenter;
 #[async_trait]
 impl UseCaseOutputPort<UpdateTodoResponseModel> for UpdateTodoPresenter {
     async fn success(&self, response_model: UpdateTodoResponseModel) {
-        let id = response_model.id;
+        let id = response_model.todo_id;
         println!("===");
         println!("UpdateTodoPresenter: Todo with ID <{}> successfully updated.", id);
         println!("===");

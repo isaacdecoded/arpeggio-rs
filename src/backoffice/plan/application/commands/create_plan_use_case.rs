@@ -23,7 +23,7 @@ pub struct CreatePlanRequestModel {
 }
 
 pub struct CreatePlanResponseModel {
-    pub id: String,
+    pub plan_id: String,
 }
 
 pub struct CreatePlanUseCase<'a> {
@@ -58,7 +58,7 @@ impl<'a> CreatePlanUseCase<'a> {
         self.domain_event_bus.publish(plan.pull_domain_events()).await?;
         self.repository.save(&plan).await?;
         Ok(CreatePlanResponseModel {
-            id: plan.get_id().to_string(),
+            plan_id: plan.get_id().to_string(),
         })
     }
 }
