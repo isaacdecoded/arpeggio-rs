@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use std::sync::Arc;
 use crate::{
     backoffice::plan::{
-        application::queries::find_plans_use_case::FindPlansReadModel,
+        application::queries::find_plans_use_case::PlanReadModel,
         domain::repositories::find_plans_repository::{
             FindPlansRepository,
             FindPlansRepositoryError,
@@ -23,11 +23,11 @@ impl InMemoryFindPlansRepository {
 }
 
 #[async_trait]
-impl FindPlansRepository<FindPlansReadModel> for InMemoryFindPlansRepository {
+impl FindPlansRepository<PlanReadModel> for InMemoryFindPlansRepository {
     async fn find(
         &self,
         criteria: Criteria
-    ) -> Result<Vec<FindPlansReadModel>, FindPlansRepositoryError> {
+    ) -> Result<Vec<PlanReadModel>, FindPlansRepositoryError> {
         let plans: Vec<_> = self.in_memory_repository.read_plans
             .read()
             .map_err(|e| FindPlansRepositoryError::FindError(e.to_string()))?
@@ -40,7 +40,7 @@ impl FindPlansRepository<FindPlansReadModel> for InMemoryFindPlansRepository {
                     })
             })
             .map(|(id, plan_model)| {
-                FindPlansReadModel {
+                PlanReadModel {
                     id: id.to_string(),
                     name: plan_model.name.clone(),
                     todo_count: plan_model.todos.len(),

@@ -21,7 +21,7 @@ pub struct CheckTodoRequestModel {
 }
 
 pub struct CheckTodoResponseModel {
-    pub id: String,
+    pub todo_id: String,
 }
 
 pub struct CheckTodoUseCase<'a> {
@@ -55,7 +55,7 @@ impl<'a> CheckTodoUseCase<'a> {
                 plan.mark_todo_as_done(&todo_id)?;
                 self.repository.save(&plan).await?;
                 self.domain_event_bus.publish(plan.pull_domain_events()).await?;
-                Ok(CheckTodoResponseModel { id: todo_id.get_value().to_string() })
+                Ok(CheckTodoResponseModel { todo_id: todo_id.get_value().to_string() })
             }
             None => {
                 Err(

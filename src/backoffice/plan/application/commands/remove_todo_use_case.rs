@@ -23,7 +23,7 @@ pub struct RemoveTodoRequestModel {
 }
 
 pub struct RemoveTodoResponseModel {
-    pub id: String,
+    pub todo_id: String,
 }
 
 pub struct RemoveTodoUseCase<'a> {
@@ -53,7 +53,7 @@ impl<'a> RemoveTodoUseCase<'a> {
                 let todo_id = IdentityObject::new(request_model.todo_id)?;
                 plan.remove_todo(&todo_id)?;
                 self.repository.save(&plan).await?;
-                Ok(RemoveTodoResponseModel { id: todo_id.get_value().to_string() })
+                Ok(RemoveTodoResponseModel { todo_id: todo_id.get_value().to_string() })
             }
             None => {
                 Err(

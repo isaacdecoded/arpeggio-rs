@@ -18,7 +18,7 @@ impl AddTodoPresenter {
 #[async_trait]
 impl UseCaseOutputPort<AddTodoResponseModel> for AddTodoPresenter {
     async fn success(&self, response_model: AddTodoResponseModel) {
-        let id = response_model.id;
+        let id = response_model.todo_id;
         println!("===");
         println!("AddTodoPresenter: Todo with ID <{}> successfully added.", id);
         println!("===");

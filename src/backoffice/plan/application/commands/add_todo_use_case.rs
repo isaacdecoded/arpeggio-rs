@@ -33,7 +33,7 @@ pub struct AddTodoRequestModel {
 }
 
 pub struct AddTodoResponseModel {
-    pub id: String,
+    pub todo_id: String,
 }
 
 pub struct AddTodoUseCase<'a> {
@@ -69,7 +69,7 @@ impl<'a> AddTodoUseCase<'a> {
                 self.repository.save(&plan).await?;
                 self.domain_event_bus.publish(plan.pull_domain_events()).await?;
                 Ok(AddTodoResponseModel {
-                    id: id.get_value().to_string(),
+                    todo_id: id.get_value().to_string(),
                 })
             }
             None => {

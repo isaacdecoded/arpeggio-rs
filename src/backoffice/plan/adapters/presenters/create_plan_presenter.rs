@@ -18,7 +18,7 @@ impl CreatePlanPresenter {
 #[async_trait]
 impl UseCaseOutputPort<CreatePlanResponseModel> for CreatePlanPresenter {
     async fn success(&self, response_model: CreatePlanResponseModel) {
-        let id = response_model.id;
+        let id = response_model.plan_id;
         println!("===");
         println!("Plan with ID <{}> successfully created.", id);
         println!("===");

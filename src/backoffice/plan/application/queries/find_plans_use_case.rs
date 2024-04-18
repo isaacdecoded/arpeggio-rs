@@ -17,7 +17,7 @@ pub struct FindPlansRequestModel {
     pub limit: u16,
 }
 
-pub struct FindPlansReadModel {
+pub struct PlanReadModel {
     pub id: String,
     pub name: String,
     pub todo_count: usize,
@@ -26,17 +26,17 @@ pub struct FindPlansReadModel {
 }
 
 pub struct FindPlansResponseModel {
-    pub plans: Vec<FindPlansReadModel>,
+    pub plans: Vec<PlanReadModel>,
 }
 
 pub struct FindPlansUseCase<'a> {
-    repository: &'a dyn FindPlansRepository<FindPlansReadModel>,
+    repository: &'a dyn FindPlansRepository<PlanReadModel>,
     output_port: &'a dyn UseCaseOutputPort<FindPlansResponseModel>,
 }
 
 impl<'a> FindPlansUseCase<'a> {
     pub fn new(
-        repository: &'a dyn FindPlansRepository<FindPlansReadModel>,
+        repository: &'a dyn FindPlansRepository<PlanReadModel>,
         output_port: &'a dyn UseCaseOutputPort<FindPlansResponseModel>
     ) -> Self {
         Self {

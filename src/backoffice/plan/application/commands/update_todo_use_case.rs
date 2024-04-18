@@ -27,7 +27,7 @@ pub struct UpdateTodoRequestModel {
 }
 
 pub struct UpdateTodoResponseModel {
-    pub id: String,
+    pub todo_id: String,
 }
 
 pub struct UpdateTodoUseCase<'a> {
@@ -57,7 +57,7 @@ impl<'a> UpdateTodoUseCase<'a> {
                     &TodoDescription::new(request_model.description)?
                 )?;
                 self.repository.save(&plan).await?;
-                Ok(UpdateTodoResponseModel { id: todo_id.get_value().to_string() })
+                Ok(UpdateTodoResponseModel { todo_id: todo_id.get_value().to_string() })
             }
             None => {
                 Err(
