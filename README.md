@@ -1,6 +1,10 @@
+<p align="center">
+  <img src="../misc/0-Arpeggio-on-Rust.png" loading="lazy"/>
+</p>
+
 # ARPEGGIO ON RUST
 
-This is the Arpeggio coding template based on [Rust](https://www.rust-lang.org/).
+This is the [Arpeggio](https://github.com/isaacdecoded/arpeggio) coding template based on [Rust](https://www.rust-lang.org/).
 
 ### Requirements
 
