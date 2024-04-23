@@ -1,10 +1,27 @@
+use std::time::SystemTime;
+
 pub enum FilterOperator {
     Equal,
     NotEqual,
     GreaterThan,
     LessThan,
+    GreaterOrEqual,
+    LessOrEqual,
     Contains,
     NotContains,
+}
+
+pub enum FilterValue {
+    Str(String),
+    I32(i32),
+    Bool(bool),
+    Date(SystemTime),
+}
+
+pub struct Filter<Enum> {
+    pub field: Enum,
+    pub operator: FilterOperator,
+    pub value: FilterValue,
 }
 
 pub enum SortOrder {
@@ -12,37 +29,15 @@ pub enum SortOrder {
     Desc,
 }
 
-pub struct Sort {
-    pub field: String,
+pub struct Sort<Enum> {
+    pub field: Enum,
     pub order: SortOrder,
 }
 
-pub struct Filter {
-    pub field: String,
-    pub operator: FilterOperator,
-    pub value: String,
-}
-
-pub struct Criteria {
-    pub filters: Vec<Filter>,
-    pub limit: Option<u16>,
-    pub offset: Option<u16>,
-}
-
-impl Criteria {
-    pub fn new(filters: Vec<Filter>, limit: Option<u16>, offset: Option<u16>) -> Self {
-        Self {
-            filters,
-            limit,
-            offset,
-        }
-    }
-
-    pub fn new_with_filters_only(filters: Vec<Filter>) -> Self {
-        Self {
-            filters,
-            limit: None,
-            offset: None,
-        }
-    }
+pub trait Criteria<Enum> {
+    fn get_filters(&self) -> &[&Filter<Enum>];
+    fn get_selections(&self) -> Option<&[&Enum]>;
+    fn get_sorts(&self) -> Option<&[&Sort<Enum>]>;
+    fn get_limit(&self) -> Option<u16>;
+    fn get_offset(&self) -> Option<u16>;
 }
