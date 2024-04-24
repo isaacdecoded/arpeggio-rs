@@ -1,6 +1,6 @@
 use thiserror::Error;
 use async_trait::async_trait;
-use crate::core::domain::repositories::criteria::Criteria;
+use crate::backoffice::plan::domain::repositories::criteria::find_plans_criteria::FindPlansCriteria;
 
 #[derive(Error, Debug)]
 pub enum FindPlansRepositoryError {
@@ -9,5 +9,8 @@ pub enum FindPlansRepositoryError {
 
 #[async_trait]
 pub trait FindPlansRepository<ReadModel>: Sync {
-    async fn find(&self, criteria: Criteria) -> Result<Vec<ReadModel>, FindPlansRepositoryError>;
+    async fn find(
+        &self,
+        criteria: &FindPlansCriteria
+    ) -> Result<Vec<ReadModel>, FindPlansRepositoryError>;
 }
