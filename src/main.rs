@@ -62,7 +62,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     backoffice_context.plan_aggregate.find_plans(FindPlansRequestObject {
         limit: 10,
         offset: 0,
-        name: None,
+        name: Some("First".to_string()),
     }).await;
 
     let plan_id = backoffice_context.plan_aggregate.caught_plan_id.lock().unwrap().to_string();

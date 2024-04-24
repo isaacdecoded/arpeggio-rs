@@ -3,9 +3,9 @@ use std::sync::Arc;
 use crate::{
     backoffice::plan::{
         application::queries::find_plans_use_case::PlanReadModel,
-        domain::repositories::find_plans_repository::{
-            FindPlansRepository,
-            FindPlansRepositoryError,
+        domain::repositories::{
+            criteria::find_plans_criteria::{ FindPlansCriteria, PlanFieldEnum },
+            find_plans_repository::{ FindPlansRepository, FindPlansRepositoryError },
         },
     },
     core::domain::repositories::criteria::Criteria,
@@ -26,17 +26,21 @@ impl InMemoryFindPlansRepository {
 impl FindPlansRepository<PlanReadModel> for InMemoryFindPlansRepository {
     async fn find(
         &self,
-        criteria: Criteria
+        criteria: &FindPlansCriteria
     ) -> Result<Vec<PlanReadModel>, FindPlansRepositoryError> {
         let plans: Vec<_> = self.in_memory_repository.read_plans
             .read()
             .map_err(|e| FindPlansRepositoryError::FindError(e.to_string()))?
             .iter()
             .filter(|(_, plan_model)| {
-                criteria.filters
+                criteria
+                    .get_filters()
                     .iter()
                     .all(|filter| {
-                        filter.field != "name" || plan_model.name.contains(&filter.value)
+                        match filter.field {
+                            PlanFieldEnum::Name =>
+                                plan_model.name.contains(&filter.value.to_string()),
+                        }
                     })
             })
             .map(|(id, plan_model)| {
