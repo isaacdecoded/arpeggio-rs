@@ -1,4 +1,4 @@
-use std::time::SystemTime;
+use std::{ fmt, time::SystemTime };
 
 pub enum FilterOperator {
     Equal,
@@ -18,6 +18,17 @@ pub enum FilterValue {
     Date(SystemTime),
 }
 
+impl fmt::Display for FilterValue {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            FilterValue::Str(s) => write!(f, "{}", s),
+            FilterValue::I32(n) => write!(f, "{}", n),
+            FilterValue::Bool(b) => write!(f, "{}", b),
+            FilterValue::Date(d) => write!(f, "{:?}", d),
+        }
+    }
+}
+
 pub struct Filter<Enum> {
     pub field: Enum,
     pub operator: FilterOperator,
@@ -35,9 +46,10 @@ pub struct Sort<Enum> {
 }
 
 pub trait Criteria<Enum> {
-    fn get_filters(&self) -> &[&Filter<Enum>];
-    fn get_selections(&self) -> Option<&[&Enum]>;
-    fn get_sorts(&self) -> Option<&[&Sort<Enum>]>;
-    fn get_limit(&self) -> Option<u16>;
-    fn get_offset(&self) -> Option<u16>;
+    fn new(filters: Vec<Filter<Enum>>) -> Self;
+    fn get_filters(&self) -> &[Filter<Enum>];
+    fn get_selections(&self) -> Option<&[Enum]>;
+    fn get_sorts(&self) -> Option<&[Sort<Enum>]>;
+    fn get_limit(&self) -> Option<&u16>;
+    fn get_offset(&self) -> Option<&u16>;
 }
