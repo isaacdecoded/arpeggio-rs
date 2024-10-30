@@ -1,5 +1,5 @@
-use crate::core::domain::models::entity::Entity;
 use crate::core::domain::events::domain_event::DomainEvent;
+use crate::core::domain::models::entity::Entity;
 use crate::core::domain::models::value_object::ValueObject;
 
 pub trait AggregateRoot<Id: ValueObject<String>>: Entity<Id> {

@@ -1,5 +1,5 @@
-use std::{ error::Error, fmt };
 use crate::core::domain::models::value_object::ValueObject;
+use std::{error::Error, fmt};
 
 #[derive(Clone)]
 pub struct IdentityObject {
@@ -28,7 +28,7 @@ impl ValueObject<String> for IdentityObject {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::domain::models::{ value_object::ValueObject, identity_object::IdentityObject };
+    use crate::core::domain::models::{identity_object::IdentityObject, value_object::ValueObject};
 
     #[test]
     fn should_initialize_valid_instance() {

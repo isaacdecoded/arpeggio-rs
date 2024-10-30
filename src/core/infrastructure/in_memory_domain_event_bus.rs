@@ -1,11 +1,11 @@
-use async_trait::async_trait;
-use std::error::Error;
 use crate::core::domain::events::{
     domain_event::DomainEvent,
     domain_event_bus::DomainEventBus,
     domain_event_subscriber::DomainEventSubscriber,
 };
+use async_trait::async_trait;
 use std::collections::HashMap;
+use std::error::Error;
 
 #[derive(Default)]
 pub struct InMemoryDomainEventBus {
@@ -47,17 +47,17 @@ impl DomainEventBus for InMemoryDomainEventBus {
 
 #[cfg(test)]
 mod tests {
-    use std::error::Error;
-    use async_trait::async_trait;
-    use std::{ any::Any, time::SystemTime };
     use crate::core::{
         domain::events::{
-            domain_event_bus::DomainEventBus,
             domain_event::DomainEvent,
+            domain_event_bus::DomainEventBus,
             domain_event_subscriber::DomainEventSubscriber,
         },
         infrastructure::in_memory_domain_event_bus::InMemoryDomainEventBus,
     };
+    use async_trait::async_trait;
+    use std::error::Error;
+    use std::{ any::Any, time::SystemTime };
 
     struct TestSubscriber;
     struct TestDomainEvent {

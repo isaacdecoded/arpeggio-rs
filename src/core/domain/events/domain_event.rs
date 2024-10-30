@@ -1,4 +1,4 @@
-use std::{ any::Any, time::SystemTime };
+use std::{any::Any, time::SystemTime};
 
 pub trait DomainEvent: Send + Sync {
     fn get_name(&self) -> String;

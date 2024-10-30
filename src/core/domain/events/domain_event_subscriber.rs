@@ -1,6 +1,6 @@
+use crate::core::domain::events::domain_event::DomainEvent;
 use async_trait::async_trait;
 use std::error::Error;
-use crate::core::domain::events::domain_event::DomainEvent;
 
 #[async_trait]
 pub trait DomainEventSubscriber: Send + Sync {

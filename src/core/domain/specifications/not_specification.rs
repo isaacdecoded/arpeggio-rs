@@ -10,7 +10,10 @@ impl<A> NotSpecification<A> {
     }
 }
 
-impl<T, A> Specification<T> for NotSpecification<A> where A: Specification<T> {
+impl<T, A> Specification<T> for NotSpecification<A>
+where
+    A: Specification<T>,
+{
     fn is_satisfied_by(&self, candidate: &T) -> bool {
         !self.spec.is_satisfied_by(candidate)
     }
