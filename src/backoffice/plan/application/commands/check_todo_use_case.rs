@@ -1,18 +1,18 @@
+use crate::backoffice::plan::domain::repositories::plan_repository::PlanRepository;
+use crate::core::application::{
+    use_case_input_port::UseCaseInputPort, use_case_output_port::UseCaseOutputPort,
+};
+use crate::core::domain::events::domain_event_bus::DomainEventBus;
+use crate::core::domain::models::value_object::ValueObject;
+use crate::core::domain::models::{aggregate_root::AggregateRoot, identity_object::IdentityObject};
 use async_trait::async_trait;
 use std::error::Error;
 use thiserror::Error;
-use crate::core::domain::models::{ identity_object::IdentityObject, aggregate_root::AggregateRoot };
-use crate::core::domain::events::domain_event_bus::DomainEventBus;
-use crate::core::application::{
-    use_case_input_port::UseCaseInputPort,
-    use_case_output_port::UseCaseOutputPort,
-};
-use crate::backoffice::plan::domain::repositories::plan_repository::PlanRepository;
-use crate::core::domain::models::value_object::ValueObject;
 
 #[derive(Error, Debug)]
 pub enum CheckTodoUseCaseError {
-    #[error("Unable to check Todo: {0}")] TodoNotCheckedError(String),
+    #[error("Unable to check Todo: {0}")]
+    TodoNotCheckedError(String),
 }
 
 pub struct CheckTodoRequestModel {
@@ -34,7 +34,7 @@ impl<'a> CheckTodoUseCase<'a> {
     pub fn new(
         repository: &'a dyn PlanRepository,
         domain_event_bus: &'a dyn DomainEventBus,
-        output_port: &'a dyn UseCaseOutputPort<CheckTodoResponseModel>
+        output_port: &'a dyn UseCaseOutputPort<CheckTodoResponseModel>,
     ) -> Self {
         Self {
             repository,
@@ -45,7 +45,7 @@ impl<'a> CheckTodoUseCase<'a> {
 
     async fn try_interact(
         &self,
-        request_model: CheckTodoRequestModel
+        request_model: CheckTodoRequestModel,
     ) -> Result<CheckTodoResponseModel, Box<dyn Error + Send + Sync>> {
         let plan_id = IdentityObject::new(request_model.plan_id)?;
         let result = self.repository.get_by_id(&plan_id).await?;
@@ -54,16 +54,18 @@ impl<'a> CheckTodoUseCase<'a> {
                 let todo_id = IdentityObject::new(request_model.todo_id)?;
                 plan.mark_todo_as_done(&todo_id)?;
                 self.repository.save(&plan).await?;
-                self.domain_event_bus.publish(plan.pull_domain_events()).await?;
-                Ok(CheckTodoResponseModel { todo_id: todo_id.get_value().to_string() })
+                self.domain_event_bus
+                    .publish(plan.pull_domain_events())
+                    .await?;
+                Ok(CheckTodoResponseModel {
+                    todo_id: todo_id.get_value().to_string(),
+                })
             }
-            None => {
-                Err(
-                    CheckTodoUseCaseError::TodoNotCheckedError(
-                        format!("Plan with ID <{}> do not exist", plan_id.get_value())
-                    ).into()
-                )
-            }
+            None => Err(CheckTodoUseCaseError::TodoNotCheckedError(format!(
+                "Plan with ID <{}> do not exist",
+                plan_id.get_value()
+            ))
+            .into()),
         }
     }
 }

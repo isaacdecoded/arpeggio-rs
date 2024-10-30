@@ -1,12 +1,11 @@
-use async_trait::async_trait;
 use crate::{
     backoffice::plan::application::commands::create_plan_use_case::{
-        CreatePlanUseCase,
-        CreatePlanRequestModel,
+        CreatePlanRequestModel, CreatePlanUseCase,
     },
     core::adapters::controller::Controller,
     core::application::use_case_input_port::UseCaseInputPort,
 };
+use async_trait::async_trait;
 
 pub struct CreatePlanRequestObject {
     pub name: String,
@@ -25,8 +24,10 @@ impl<'a> CreatePlanController<'a> {
 #[async_trait]
 impl<'a> Controller<CreatePlanRequestObject> for CreatePlanController<'a> {
     async fn execute(&self, request_object: CreatePlanRequestObject) {
-        self.use_case.interact(CreatePlanRequestModel {
-            name: request_object.name,
-        }).await
+        self.use_case
+            .interact(CreatePlanRequestModel {
+                name: request_object.name,
+            })
+            .await
     }
 }

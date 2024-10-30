@@ -1,7 +1,7 @@
-use std::time::SystemTime;
+use crate::{backoffice::plan::domain::entities::plan::Plan, core::domain::models::entity::Entity};
 use std::collections::HashMap;
-use std::sync::{ Arc, RwLock };
-use crate::{ backoffice::plan::domain::entities::plan::Plan, core::domain::models::entity::Entity };
+use std::sync::{Arc, RwLock};
+use std::time::SystemTime;
 
 #[derive(Clone)]
 pub struct TodoWriteModel {
@@ -51,10 +51,9 @@ impl InMemoryRepository {
     }
 
     pub fn sync_read_plans(&self, plan: &Plan) {
-        self.read_plans
-            .write()
-            .unwrap()
-            .insert(plan.get_id().to_string(), PlanReadModel {
+        self.read_plans.write().unwrap().insert(
+            plan.get_id().to_string(),
+            PlanReadModel {
                 id: plan.get_id().to_string(),
                 name: plan.get_name().to_string(),
                 todos: plan
@@ -70,6 +69,7 @@ impl InMemoryRepository {
                     .collect(),
                 created_at: *plan.get_created_at(),
                 updated_at: plan.get_updated_at().copied(),
-            });
+            },
+        );
     }
 }

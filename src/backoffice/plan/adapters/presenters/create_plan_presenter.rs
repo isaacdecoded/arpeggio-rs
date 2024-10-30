@@ -1,7 +1,7 @@
+use crate::backoffice::plan::application::commands::create_plan_use_case::CreatePlanResponseModel;
+use crate::core::application::use_case_output_port::UseCaseOutputPort;
 use async_trait::async_trait;
 use std::error::Error;
-use crate::core::application::use_case_output_port::UseCaseOutputPort;
-use crate::backoffice::plan::application::commands::create_plan_use_case::CreatePlanResponseModel;
 
 pub struct CreatePlanPresenter {
     plan_id_catcher: Box<dyn Fn(String) + Sync + Send>,

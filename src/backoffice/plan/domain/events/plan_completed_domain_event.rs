@@ -1,8 +1,8 @@
+use crate::backoffice::plan::domain::entities::plan::Plan;
+use crate::core::domain::events::domain_event::DomainEvent;
+use crate::core::domain::models::entity::Entity;
 use std::any::Any;
 use std::time::SystemTime;
-use crate::core::domain::models::entity::Entity;
-use crate::core::domain::events::domain_event::DomainEvent;
-use crate::backoffice::plan::domain::entities::plan::Plan;
 
 pub struct PlanCompletedDomainEvent {
     aggregate_root_id: String,

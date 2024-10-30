@@ -1,18 +1,17 @@
-use std::time::SystemTime;
-use async_trait::async_trait;
 use crate::{
     backoffice::plan::domain::repositories::{
-        criteria::find_plans_criteria::{ FindPlansCriteria, PlanFieldEnum },
+        criteria::find_plans_criteria::{FindPlansCriteria, PlanFieldEnum},
         find_plans_repository::FindPlansRepository,
     },
     core::{
         application::{
-            use_case_input_port::UseCaseInputPort,
-            use_case_output_port::UseCaseOutputPort,
+            use_case_input_port::UseCaseInputPort, use_case_output_port::UseCaseOutputPort,
         },
-        domain::repositories::criteria::{ Criteria, Filter, FilterOperator, FilterValue },
+        domain::repositories::criteria::{Criteria, Filter, FilterOperator, FilterValue},
     },
 };
+use async_trait::async_trait;
+use std::time::SystemTime;
 
 pub struct FindPlansRequestModel {
     pub name: Option<String>,
@@ -40,7 +39,7 @@ pub struct FindPlansUseCase<'a> {
 impl<'a> FindPlansUseCase<'a> {
     pub fn new(
         repository: &'a dyn FindPlansRepository<PlanReadModel>,
-        output_port: &'a dyn UseCaseOutputPort<FindPlansResponseModel>
+        output_port: &'a dyn UseCaseOutputPort<FindPlansResponseModel>,
     ) -> Self {
         Self {
             repository,
@@ -65,7 +64,9 @@ impl<'a> UseCaseInputPort<FindPlansRequestModel> for FindPlansUseCase<'a> {
             .with_offset(request_model.offset);
         match self.repository.find(&criteria).await {
             Ok(plans) => {
-                self.output_port.success(FindPlansResponseModel { plans }).await;
+                self.output_port
+                    .success(FindPlansResponseModel { plans })
+                    .await;
             }
             Err(error) => {
                 self.output_port.failure(error.into()).await;

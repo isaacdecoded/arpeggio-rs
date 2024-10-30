@@ -1,16 +1,16 @@
-use async_trait::async_trait;
-use std::sync::Arc;
+use super::in_memory_repository::InMemoryRepository;
 use crate::{
     backoffice::plan::{
         application::queries::find_plans_use_case::PlanReadModel,
         domain::repositories::{
-            criteria::find_plans_criteria::{ FindPlansCriteria, PlanFieldEnum },
-            find_plans_repository::{ FindPlansRepository, FindPlansRepositoryError },
+            criteria::find_plans_criteria::{FindPlansCriteria, PlanFieldEnum},
+            find_plans_repository::{FindPlansRepository, FindPlansRepositoryError},
         },
     },
     core::domain::repositories::criteria::Criteria,
 };
-use super::in_memory_repository::InMemoryRepository;
+use async_trait::async_trait;
+use std::sync::Arc;
 
 pub struct InMemoryFindPlansRepository {
     in_memory_repository: Arc<InMemoryRepository>,
@@ -18,7 +18,9 @@ pub struct InMemoryFindPlansRepository {
 
 impl InMemoryFindPlansRepository {
     pub fn new(in_memory_repository: Arc<InMemoryRepository>) -> Self {
-        Self { in_memory_repository }
+        Self {
+            in_memory_repository,
+        }
     }
 }
 
@@ -26,9 +28,11 @@ impl InMemoryFindPlansRepository {
 impl FindPlansRepository<PlanReadModel> for InMemoryFindPlansRepository {
     async fn find(
         &self,
-        criteria: &FindPlansCriteria
+        criteria: &FindPlansCriteria,
     ) -> Result<Vec<PlanReadModel>, FindPlansRepositoryError> {
-        let plans: Vec<_> = self.in_memory_repository.read_plans
+        let plans: Vec<_> = self
+            .in_memory_repository
+            .read_plans
             .read()
             .map_err(|e| FindPlansRepositoryError::FindError(e.to_string()))?
             .iter()
@@ -36,21 +40,16 @@ impl FindPlansRepository<PlanReadModel> for InMemoryFindPlansRepository {
                 criteria
                     .get_filters()
                     .iter()
-                    .all(|filter| {
-                        match filter.field {
-                            PlanFieldEnum::Name =>
-                                plan_model.name.contains(&filter.value.to_string()),
-                        }
+                    .all(|filter| match filter.field {
+                        PlanFieldEnum::Name => plan_model.name.contains(&filter.value.to_string()),
                     })
             })
-            .map(|(id, plan_model)| {
-                PlanReadModel {
-                    id: id.to_string(),
-                    name: plan_model.name.clone(),
-                    todo_count: plan_model.todos.len(),
-                    created_at: plan_model.created_at,
-                    updated_at: plan_model.updated_at,
-                }
+            .map(|(id, plan_model)| PlanReadModel {
+                id: id.to_string(),
+                name: plan_model.name.clone(),
+                todo_count: plan_model.todos.len(),
+                created_at: plan_model.created_at,
+                updated_at: plan_model.updated_at,
             })
             .collect();
         Ok(plans)

@@ -14,12 +14,11 @@ impl TodoDescription {
 impl ValueObject<String> for TodoDescription {
     fn new(value: String) -> Result<Self, Box<dyn Error + Sync + Send>> {
         if value.len() > Self::MAX_LENGTH {
-            return Err(
-                format!(
-                    "The description exceeds the maximum length of {} characters.",
-                    Self::MAX_LENGTH
-                ).into()
-            );
+            return Err(format!(
+                "The description exceeds the maximum length of {} characters.",
+                Self::MAX_LENGTH
+            )
+            .into());
         }
         Ok(TodoDescription { value })
     }
@@ -35,8 +34,8 @@ impl ValueObject<String> for TodoDescription {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::domain::models::value_object::ValueObject;
     use crate::backoffice::plan::domain::value_objects::todo_description::TodoDescription;
+    use crate::core::domain::models::value_object::ValueObject;
 
     #[test]
     fn should_initialize_valid_instance() {

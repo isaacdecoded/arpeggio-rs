@@ -1,12 +1,12 @@
+use crate::backoffice::plan::domain::{
+    events::todo_added_domain_event::TodoAddedDomainEvent,
+    services::notification_service::{NotificationService, TodoAddedNotificationRequest},
+};
+use crate::core::domain::events::domain_event::DomainEvent;
+use crate::core::domain::events::domain_event_subscriber::DomainEventSubscriber;
 use async_trait::async_trait;
 use std::error::Error;
 use std::sync::Arc;
-use crate::core::domain::events::domain_event_subscriber::DomainEventSubscriber;
-use crate::core::domain::events::domain_event::DomainEvent;
-use crate::backoffice::plan::domain::{
-    services::notification_service::{ NotificationService, TodoAddedNotificationRequest },
-    events::todo_added_domain_event::TodoAddedDomainEvent,
-};
 
 pub struct EmailRecipientData {
     pub address: String,
@@ -19,7 +19,9 @@ pub struct SendNotificationOnTodoAddedSubscriber {
 
 impl SendNotificationOnTodoAddedSubscriber {
     pub fn new(notification_service: Arc<dyn NotificationService>) -> Box<Self> {
-        Box::new(Self { notification_service })
+        Box::new(Self {
+            notification_service,
+        })
     }
 }
 
@@ -37,9 +39,15 @@ impl DomainEventSubscriber for SendNotificationOnTodoAddedSubscriber {
                 todo_description: todo_created.get_todo_description().to_string(),
                 todo_created_at: todo_created.get_todo_added_at().to_owned(),
             };
-            self.notification_service.send_new_todo_details(request).await?;
+            self.notification_service
+                .send_new_todo_details(request)
+                .await?;
             return Ok(());
         }
-        Err(format!("Invalid domain event type with name {}", domain_event.get_name()).into())
+        Err(format!(
+            "Invalid domain event type with name {}",
+            domain_event.get_name()
+        )
+        .into())
     }
 }

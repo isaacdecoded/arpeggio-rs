@@ -1,6 +1,3 @@
-use async_trait::async_trait;
-use std::error::Error;
-use thiserror::Error;
 use crate::{
     backoffice::plan::domain::{
         repositories::plan_repository::PlanRepository,
@@ -8,16 +5,19 @@ use crate::{
     },
     core::{
         application::{
-            use_case_input_port::UseCaseInputPort,
-            use_case_output_port::UseCaseOutputPort,
+            use_case_input_port::UseCaseInputPort, use_case_output_port::UseCaseOutputPort,
         },
-        domain::models::{ identity_object::IdentityObject, value_object::ValueObject },
+        domain::models::{identity_object::IdentityObject, value_object::ValueObject},
     },
 };
+use async_trait::async_trait;
+use std::error::Error;
+use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum UpdateTodoUseCaseError {
-    #[error("Unable to update Todo: {0}")] TodoNotUpdatedError(String),
+    #[error("Unable to update Todo: {0}")]
+    TodoNotUpdatedError(String),
 }
 
 pub struct UpdateTodoRequestModel {
@@ -38,14 +38,17 @@ pub struct UpdateTodoUseCase<'a> {
 impl<'a> UpdateTodoUseCase<'a> {
     pub fn new(
         repository: &'a dyn PlanRepository,
-        output_port: &'a dyn UseCaseOutputPort<UpdateTodoResponseModel>
+        output_port: &'a dyn UseCaseOutputPort<UpdateTodoResponseModel>,
     ) -> Self {
-        Self { repository, output_port }
+        Self {
+            repository,
+            output_port,
+        }
     }
 
     async fn try_interact(
         &self,
-        request_model: UpdateTodoRequestModel
+        request_model: UpdateTodoRequestModel,
     ) -> Result<UpdateTodoResponseModel, Box<dyn Error + Send + Sync>> {
         let plan_id = IdentityObject::new(request_model.plan_id)?;
         let result = self.repository.get_by_id(&plan_id).await?;
@@ -54,18 +57,18 @@ impl<'a> UpdateTodoUseCase<'a> {
                 let todo_id = IdentityObject::new(request_model.todo_id)?;
                 plan.change_todo_description(
                     &todo_id,
-                    &TodoDescription::new(request_model.description)?
+                    &TodoDescription::new(request_model.description)?,
                 )?;
                 self.repository.save(&plan).await?;
-                Ok(UpdateTodoResponseModel { todo_id: todo_id.get_value().to_string() })
+                Ok(UpdateTodoResponseModel {
+                    todo_id: todo_id.get_value().to_string(),
+                })
             }
-            None => {
-                Err(
-                    UpdateTodoUseCaseError::TodoNotUpdatedError(
-                        format!("Plan with ID <{}> do not exist", plan_id.get_value())
-                    ).into()
-                )
-            }
+            None => Err(UpdateTodoUseCaseError::TodoNotUpdatedError(format!(
+                "Plan with ID <{}> do not exist",
+                plan_id.get_value()
+            ))
+            .into()),
         }
     }
 }

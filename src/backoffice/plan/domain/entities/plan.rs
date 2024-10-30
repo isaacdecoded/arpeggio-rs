@@ -1,22 +1,19 @@
-use thiserror::Error;
-use std::time::SystemTime;
-use crate::backoffice::plan::domain::value_objects::todo_description::TodoDescription;
-use crate::core::domain::models::{
-    aggregate_root::AggregateRoot,
-    entity::Entity,
-    date_value_object::DateValueObject,
-    identity_object::IdentityObject,
-    value_object::ValueObject,
-};
-use crate::core::domain::events::domain_event::DomainEvent;
+use crate::backoffice::plan::domain::entities::todo::{CreateTodoProps, Todo};
+use crate::backoffice::plan::domain::enums::todo_status::TodoStatus;
 use crate::backoffice::plan::domain::events::{
-    plan_created_domain_event::PlanCreatedDomainEvent,
     plan_completed_domain_event::PlanCompletedDomainEvent,
+    plan_created_domain_event::PlanCreatedDomainEvent,
     todo_added_domain_event::TodoAddedDomainEvent,
 };
-use crate::backoffice::plan::domain::entities::todo::{ Todo, CreateTodoProps };
-use crate::backoffice::plan::domain::enums::todo_status::TodoStatus;
 use crate::backoffice::plan::domain::value_objects::plan_name::PlanName;
+use crate::backoffice::plan::domain::value_objects::todo_description::TodoDescription;
+use crate::core::domain::events::domain_event::DomainEvent;
+use crate::core::domain::models::{
+    aggregate_root::AggregateRoot, date_value_object::DateValueObject, entity::Entity,
+    identity_object::IdentityObject, value_object::ValueObject,
+};
+use std::time::SystemTime;
+use thiserror::Error;
 
 pub struct CreatePlanProps {
     pub id: IdentityObject,
@@ -43,11 +40,16 @@ pub struct Plan {
 
 #[derive(Error, Debug)]
 pub enum PlanError {
-    #[error("Unable to get Todo: {0}")] GetTodo(String),
-    #[error("Unable to process Todo: {0}")] ValidateDescriptionError(String),
-    #[error("Unable to add Todo: {0}")] AddTodoError(String),
-    #[error("Unable to remove Todo: {0}")] RemoveTodoError(String),
-    #[error("Unable to mark Todo as done: {0}")] MarkTodoAsDoneError(String),
+    #[error("Unable to get Todo: {0}")]
+    GetTodo(String),
+    #[error("Unable to process Todo: {0}")]
+    ValidateDescriptionError(String),
+    #[error("Unable to add Todo: {0}")]
+    AddTodoError(String),
+    #[error("Unable to remove Todo: {0}")]
+    RemoveTodoError(String),
+    #[error("Unable to mark Todo as done: {0}")]
+    MarkTodoAsDoneError(String),
 }
 
 impl Plan {
@@ -91,7 +93,7 @@ impl Plan {
     pub fn add_todo(
         &mut self,
         id: &IdentityObject,
-        description: &TodoDescription
+        description: &TodoDescription,
     ) -> Result<(), PlanError> {
         self.validate_description_duplication(description)?;
         let todo = Todo::new(CreateTodoProps {
@@ -109,9 +111,9 @@ impl Plan {
 
     pub fn remove_todo(&mut self, id: &IdentityObject) -> Result<(), PlanError> {
         if self.is_completed() {
-            return Err(
-                PlanError::RemoveTodoError("This Plan aggregation's lifecycle is completed".into())
-            );
+            return Err(PlanError::RemoveTodoError(
+                "This Plan aggregation's lifecycle is completed".into(),
+            ));
         }
         let todo = self.get_todo(id)?;
         todo.change_status(TodoStatus::REMOVED);
@@ -122,7 +124,7 @@ impl Plan {
     pub fn change_todo_description(
         &mut self,
         id: &IdentityObject,
-        description: &TodoDescription
+        description: &TodoDescription,
     ) -> Result<(), PlanError> {
         self.validate_description_duplication(description)?;
         let todo = self.get_todo(id)?;
@@ -140,7 +142,9 @@ impl Plan {
     }
 
     pub fn is_completed(&self) -> bool {
-        self.todos.iter().all(|t| t.get_status() == &TodoStatus::DONE)
+        self.todos
+            .iter()
+            .all(|t| t.get_status() == &TodoStatus::DONE)
     }
 
     fn check_completeness(&mut self) {
@@ -151,20 +155,17 @@ impl Plan {
 
     fn validate_description_duplication(
         &self,
-        description: &TodoDescription
+        description: &TodoDescription,
     ) -> Result<(), PlanError> {
-        let description_already_exist = self.todos
+        let description_already_exist = self
+            .todos
             .iter()
             .any(|t| t.get_description() == description.get_value());
         if description_already_exist {
-            return Err(
-                PlanError::ValidateDescriptionError(
-                    format!(
-                        "Todo with the same description already exists: {}",
-                        description.get_value()
-                    )
-                )
-            );
+            return Err(PlanError::ValidateDescriptionError(format!(
+                "Todo with the same description already exists: {}",
+                description.get_value()
+            )));
         }
         Ok(())
     }
@@ -173,7 +174,9 @@ impl Plan {
         let result = self.todos.iter_mut().find(|t| t.get_id().is_equal(id));
         match result {
             Some(todo) => Ok(todo),
-            None => Err(PlanError::GetTodo("Todo not found in current Plan aggregation".into())),
+            None => Err(PlanError::GetTodo(
+                "Todo not found in current Plan aggregation".into(),
+            )),
         }
     }
 }

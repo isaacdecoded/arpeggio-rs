@@ -1,9 +1,9 @@
+use crate::{
+    backoffice::plan::application::queries::find_plans_use_case::FindPlansResponseModel,
+    core::application::use_case_output_port::UseCaseOutputPort,
+};
 use async_trait::async_trait;
 use std::error::Error;
-use crate::{
-    core::application::use_case_output_port::UseCaseOutputPort,
-    backoffice::plan::application::queries::find_plans_use_case::FindPlansResponseModel,
-};
 
 #[derive(Default)]
 pub struct FindPlansPresenter;
@@ -15,7 +15,7 @@ impl UseCaseOutputPort<FindPlansResponseModel> for FindPlansPresenter {
         for (idx, plan) in response_model.plans.iter().enumerate() {
             info.insert(
                 format!("Plan {}", idx + 1),
-                format!("{} | {} | {} todos", plan.id, plan.name, plan.todo_count)
+                format!("{} | {} | {} todos", plan.id, plan.name, plan.todo_count),
             );
         }
         println!("===");

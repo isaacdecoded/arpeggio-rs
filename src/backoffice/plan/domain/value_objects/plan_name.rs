@@ -14,12 +14,11 @@ impl PlanName {
 impl ValueObject<String> for PlanName {
     fn new(value: String) -> Result<Self, Box<dyn Error + Sync + Send>> {
         if value.len() > Self::MAX_LENGTH {
-            return Err(
-                format!(
-                    "The name exceeds the maximum length of {} characters.",
-                    Self::MAX_LENGTH
-                ).into()
-            );
+            return Err(format!(
+                "The name exceeds the maximum length of {} characters.",
+                Self::MAX_LENGTH
+            )
+            .into());
         }
         Ok(Self { value })
     }
@@ -35,8 +34,8 @@ impl ValueObject<String> for PlanName {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::domain::models::value_object::ValueObject;
     use crate::backoffice::plan::domain::value_objects::plan_name::PlanName;
+    use crate::core::domain::models::value_object::ValueObject;
 
     #[test]
     fn should_initialize_valid_instance() {

@@ -1,7 +1,7 @@
+use crate::backoffice::plan::application::commands::update_todo_use_case::UpdateTodoResponseModel;
+use crate::core::application::use_case_output_port::UseCaseOutputPort;
 use async_trait::async_trait;
 use std::error::Error;
-use crate::core::application::use_case_output_port::UseCaseOutputPort;
-use crate::backoffice::plan::application::commands::update_todo_use_case::UpdateTodoResponseModel;
 
 pub struct UpdateTodoPresenter;
 
@@ -10,7 +10,10 @@ impl UseCaseOutputPort<UpdateTodoResponseModel> for UpdateTodoPresenter {
     async fn success(&self, response_model: UpdateTodoResponseModel) {
         let id = response_model.todo_id;
         println!("===");
-        println!("UpdateTodoPresenter: Todo with ID <{}> successfully updated.", id);
+        println!(
+            "UpdateTodoPresenter: Todo with ID <{}> successfully updated.",
+            id
+        );
         println!("===");
     }
 

@@ -1,6 +1,6 @@
-use thiserror::Error;
-use std::time::SystemTime;
 use async_trait::async_trait;
+use std::time::SystemTime;
+use thiserror::Error;
 
 pub struct PlanCreatedNotificationRequest {
     pub plan_id: String,
@@ -22,23 +22,26 @@ pub struct TodoAddedNotificationRequest {
 
 #[derive(Error, Debug)]
 pub enum NotificationServiceError {
-    #[error("Unable to notify Plan creation: {0}")] NotifyPlanCreatedError(String),
-    #[error("Unable to notify Plan completion: {0}")] NotifyPlanCompletedError(String),
-    #[error("Unable to send Todo details: {0}")] SendTodoDetailsError(String),
+    #[error("Unable to notify Plan creation: {0}")]
+    NotifyPlanCreatedError(String),
+    #[error("Unable to notify Plan completion: {0}")]
+    NotifyPlanCompletedError(String),
+    #[error("Unable to send Todo details: {0}")]
+    SendTodoDetailsError(String),
 }
 
 #[async_trait]
 pub trait NotificationService: Sync + Send {
     async fn notify_plan_created(
         &self,
-        request: PlanCreatedNotificationRequest
+        request: PlanCreatedNotificationRequest,
     ) -> Result<(), NotificationServiceError>;
     async fn notify_plan_completed(
         &self,
-        request: PlanCompletedNotificationRequest
+        request: PlanCompletedNotificationRequest,
     ) -> Result<(), NotificationServiceError>;
     async fn send_new_todo_details(
         &self,
-        request: TodoAddedNotificationRequest
+        request: TodoAddedNotificationRequest,
     ) -> Result<(), NotificationServiceError>;
 }

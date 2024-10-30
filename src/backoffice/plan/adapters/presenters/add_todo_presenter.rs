@@ -1,7 +1,7 @@
+use crate::backoffice::plan::application::commands::add_todo_use_case::AddTodoResponseModel;
+use crate::core::application::use_case_output_port::UseCaseOutputPort;
 use async_trait::async_trait;
 use std::error::Error;
-use crate::core::application::use_case_output_port::UseCaseOutputPort;
-use crate::backoffice::plan::application::commands::add_todo_use_case::AddTodoResponseModel;
 
 pub struct AddTodoPresenter {
     todo_id_catcher: Box<dyn Fn(String) + Sync + Send>,
@@ -20,7 +20,10 @@ impl UseCaseOutputPort<AddTodoResponseModel> for AddTodoPresenter {
     async fn success(&self, response_model: AddTodoResponseModel) {
         let id = response_model.todo_id;
         println!("===");
-        println!("AddTodoPresenter: Todo with ID <{}> successfully added.", id);
+        println!(
+            "AddTodoPresenter: Todo with ID <{}> successfully added.",
+            id
+        );
         println!("===");
         (self.todo_id_catcher)(id);
     }

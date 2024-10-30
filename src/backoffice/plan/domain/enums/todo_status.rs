@@ -1,6 +1,6 @@
 use core::fmt;
-use std::str::FromStr;
 use std::result::Result;
+use std::str::FromStr;
 #[derive(PartialEq, Debug)]
 pub enum TodoStatus {
     PENDING,

@@ -1,42 +1,36 @@
-use std::sync::{ Arc, Mutex };
-use crate::core::adapters::controller::Controller;
-use crate::core::domain::events::domain_event_bus::DomainEventBus;
-use crate::backoffice::plan::application::{
-    commands::{
-        create_plan_use_case::CreatePlanUseCase,
-        add_todo_use_case::AddTodoUseCase,
-        update_todo_use_case::UpdateTodoUseCase,
-        remove_todo_use_case::RemoveTodoUseCase,
-        check_todo_use_case::CheckTodoUseCase,
-    },
-    queries::{ find_plans_use_case::FindPlansUseCase, get_plan_use_case::GetPlanUseCase },
-};
 use crate::backoffice::plan::adapters::{
     controllers::{
-        create_plan_controller::{ CreatePlanController, CreatePlanRequestObject },
-        find_plans_controller::{ FindPlansController, FindPlansRequestObject },
-        get_plan_controller::{ GetPlanController, GetPlanRequestObject },
-        add_todo_controller::{ AddTodoController, AddTodoRequestObject },
-        update_todo_controller::{ UpdateTodoController, UpdateTodoRequestObject },
-        remove_todo_controller::{ RemoveTodoController, RemoveTodoRequestObject },
-        check_todo_controller::{ CheckTodoController, CheckTodoRequestObject },
+        add_todo_controller::{AddTodoController, AddTodoRequestObject},
+        check_todo_controller::{CheckTodoController, CheckTodoRequestObject},
+        create_plan_controller::{CreatePlanController, CreatePlanRequestObject},
+        find_plans_controller::{FindPlansController, FindPlansRequestObject},
+        get_plan_controller::{GetPlanController, GetPlanRequestObject},
+        remove_todo_controller::{RemoveTodoController, RemoveTodoRequestObject},
+        update_todo_controller::{UpdateTodoController, UpdateTodoRequestObject},
     },
     presenters::{
-        add_todo_presenter::AddTodoPresenter,
-        check_todo_presenter::CheckTodoPresenter,
-        create_plan_presenter::CreatePlanPresenter,
-        find_plans_presenter::FindPlansPresenter,
-        get_plan_presenter::GetPlanPresenter,
-        remove_todo_presenter::RemoveTodoPresenter,
+        add_todo_presenter::AddTodoPresenter, check_todo_presenter::CheckTodoPresenter,
+        create_plan_presenter::CreatePlanPresenter, find_plans_presenter::FindPlansPresenter,
+        get_plan_presenter::GetPlanPresenter, remove_todo_presenter::RemoveTodoPresenter,
         update_todo_presenter::UpdateTodoPresenter,
     },
+};
+use crate::backoffice::plan::application::{
+    commands::{
+        add_todo_use_case::AddTodoUseCase, check_todo_use_case::CheckTodoUseCase,
+        create_plan_use_case::CreatePlanUseCase, remove_todo_use_case::RemoveTodoUseCase,
+        update_todo_use_case::UpdateTodoUseCase,
+    },
+    queries::{find_plans_use_case::FindPlansUseCase, get_plan_use_case::GetPlanUseCase},
 };
 use crate::backoffice::plan::infrastructure::repositories::{
     in_memory_find_plans_repository::InMemoryFindPlansRepository,
     in_memory_get_plan_repository::InMemoryGetPlanRepository,
-    in_memory_plan_repository::InMemoryPlanRepository,
-    in_memory_repository::InMemoryRepository,
+    in_memory_plan_repository::InMemoryPlanRepository, in_memory_repository::InMemoryRepository,
 };
+use crate::core::adapters::controller::Controller;
+use crate::core::domain::events::domain_event_bus::DomainEventBus;
+use std::sync::{Arc, Mutex};
 
 pub struct PlanAggregate<'a> {
     pub caught_plan_id: Arc<Mutex<String>>,
@@ -54,9 +48,8 @@ impl<'a> PlanAggregate<'a> {
         let caught_todo_id: Arc<Mutex<String>> = Arc::new(Mutex::new(String::new()));
 
         let in_memory_repository = InMemoryRepository::new();
-        let find_plans_repository = InMemoryFindPlansRepository::new(
-            Arc::clone(&in_memory_repository)
-        );
+        let find_plans_repository =
+            InMemoryFindPlansRepository::new(Arc::clone(&in_memory_repository));
         let get_plan_repository = InMemoryGetPlanRepository::new(Arc::clone(&in_memory_repository));
         let plan_repository = InMemoryPlanRepository::new(Arc::clone(&in_memory_repository));
 
@@ -91,11 +84,8 @@ impl<'a> PlanAggregate<'a> {
                 *caught_plan_id.lock().unwrap() = id;
             }
         });
-        let use_case = CreatePlanUseCase::new(
-            &self.plan_repository,
-            self.domain_event_bus,
-            &presenter
-        );
+        let use_case =
+            CreatePlanUseCase::new(&self.plan_repository, self.domain_event_bus, &presenter);
         let controller = CreatePlanController::new(use_case);
         controller.execute(request_object).await;
     }
@@ -107,11 +97,8 @@ impl<'a> PlanAggregate<'a> {
                 *caught_todo_id.lock().unwrap() = id;
             }
         });
-        let use_case = AddTodoUseCase::new(
-            &self.plan_repository,
-            self.domain_event_bus,
-            &presenter
-        );
+        let use_case =
+            AddTodoUseCase::new(&self.plan_repository, self.domain_event_bus, &presenter);
         let controller = AddTodoController::new(use_case);
         controller.execute(request_object).await;
     }
@@ -132,11 +119,8 @@ impl<'a> PlanAggregate<'a> {
 
     pub async fn check_todo(&self, request_object: CheckTodoRequestObject) {
         let presenter = CheckTodoPresenter;
-        let use_case = CheckTodoUseCase::new(
-            &self.plan_repository,
-            self.domain_event_bus,
-            &presenter
-        );
+        let use_case =
+            CheckTodoUseCase::new(&self.plan_repository, self.domain_event_bus, &presenter);
         let controller = CheckTodoController::new(use_case);
         let _ = controller.execute(request_object).await;
     }

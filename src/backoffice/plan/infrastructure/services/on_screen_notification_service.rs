@@ -1,12 +1,9 @@
-use async_trait::async_trait;
-use chrono::{ DateTime, Local };
 use crate::backoffice::plan::domain::services::notification_service::{
-    NotificationService,
-    PlanCreatedNotificationRequest,
-    PlanCompletedNotificationRequest,
-    TodoAddedNotificationRequest,
-    NotificationServiceError,
+    NotificationService, NotificationServiceError, PlanCompletedNotificationRequest,
+    PlanCreatedNotificationRequest, TodoAddedNotificationRequest,
 };
+use async_trait::async_trait;
+use chrono::{DateTime, Local};
 
 pub struct OnScreenNotificationService;
 
@@ -14,7 +11,7 @@ pub struct OnScreenNotificationService;
 impl NotificationService for OnScreenNotificationService {
     async fn notify_plan_created(
         &self,
-        request: PlanCreatedNotificationRequest
+        request: PlanCreatedNotificationRequest,
     ) -> Result<(), NotificationServiceError> {
         let datetime: DateTime<Local> = request.plan_created_at.into();
         println!("===");
@@ -29,7 +26,7 @@ impl NotificationService for OnScreenNotificationService {
 
     async fn notify_plan_completed(
         &self,
-        request: PlanCompletedNotificationRequest
+        request: PlanCompletedNotificationRequest,
     ) -> Result<(), NotificationServiceError> {
         let datetime: DateTime<Local> = request.plan_completed_at.into();
         println!("===");
@@ -44,7 +41,7 @@ impl NotificationService for OnScreenNotificationService {
 
     async fn send_new_todo_details(
         &self,
-        request: TodoAddedNotificationRequest
+        request: TodoAddedNotificationRequest,
     ) -> Result<(), NotificationServiceError> {
         let datetime: DateTime<Local> = request.todo_created_at.into();
         println!("===");

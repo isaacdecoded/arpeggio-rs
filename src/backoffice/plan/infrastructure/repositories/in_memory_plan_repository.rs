@@ -1,23 +1,24 @@
-use uuid::Uuid;
-use std::str::FromStr;
-use async_trait::async_trait;
-use std::sync::Arc;
 use crate::{
     backoffice::plan::domain::{
-        entities::{ plan::{ Plan, RecreatePlanProps }, todo::{ CreateTodoProps, Todo } },
+        entities::{
+            plan::{Plan, RecreatePlanProps},
+            todo::{CreateTodoProps, Todo},
+        },
         enums::todo_status::TodoStatus,
-        repositories::plan_repository::{ PlanRepository, PlanRepositoryError },
-        value_objects::{ plan_name::PlanName, todo_description::TodoDescription },
+        repositories::plan_repository::{PlanRepository, PlanRepositoryError},
+        value_objects::{plan_name::PlanName, todo_description::TodoDescription},
     },
     core::domain::models::{
-        date_value_object::DateValueObject,
-        entity::Entity,
-        identity_object::IdentityObject,
+        date_value_object::DateValueObject, entity::Entity, identity_object::IdentityObject,
         value_object::ValueObject,
     },
 };
+use async_trait::async_trait;
+use std::str::FromStr;
+use std::sync::Arc;
+use uuid::Uuid;
 
-use super::in_memory_repository::{ InMemoryRepository, PlanWriteModel, TodoWriteModel };
+use super::in_memory_repository::{InMemoryRepository, PlanWriteModel, TodoWriteModel};
 
 pub struct InMemoryPlanRepository {
     in_memory_repository: Arc<InMemoryRepository>,
@@ -25,7 +26,9 @@ pub struct InMemoryPlanRepository {
 
 impl InMemoryPlanRepository {
     pub fn new(in_memory_repository: Arc<InMemoryRepository>) -> Self {
-        Self { in_memory_repository }
+        Self {
+            in_memory_repository,
+        }
     }
 
     fn plan_to_model(&self, plan: &Plan) -> PlanWriteModel {
@@ -48,8 +51,12 @@ impl InMemoryPlanRepository {
     }
 
     fn plan_model_to_entity(&self, id: &str, model: &PlanWriteModel) -> Plan {
-        let todo_models: Vec<TodoWriteModel> = match
-            self.in_memory_repository.write_todos.read().unwrap().get(id)
+        let todo_models: Vec<TodoWriteModel> = match self
+            .in_memory_repository
+            .write_todos
+            .read()
+            .unwrap()
+            .get(id)
         {
             Some(todos) => todos.to_vec(),
             None => Vec::new(),
@@ -63,20 +70,21 @@ impl InMemoryPlanRepository {
                     .map(|todo| {
                         Todo::new(CreateTodoProps {
                             id: IdentityObject::new(todo.id.to_string()).unwrap(),
-                            description: TodoDescription::new(
-                                todo.description.to_string()
-                            ).unwrap(),
+                            description: TodoDescription::new(todo.description.to_string())
+                                .unwrap(),
                             status: TodoStatus::from_str(&todo.status).unwrap(),
                             created_at: DateValueObject::new(todo.created_at).unwrap(),
-                            updated_at: todo.updated_at.map(|date| {
-                                DateValueObject::new(date).unwrap()
-                            }),
+                            updated_at: todo
+                                .updated_at
+                                .map(|date| DateValueObject::new(date).unwrap()),
                         })
                     })
-                    .collect()
+                    .collect(),
             ),
             created_at: DateValueObject::new(model.created_at).unwrap(),
-            updated_at: model.updated_at.map(|date| { DateValueObject::new(date).unwrap() }),
+            updated_at: model
+                .updated_at
+                .map(|date| DateValueObject::new(date).unwrap()),
         })
     }
 }
@@ -85,19 +93,22 @@ impl InMemoryPlanRepository {
 impl PlanRepository for InMemoryPlanRepository {
     async fn get_by_id(&self, id: &IdentityObject) -> Result<Option<Plan>, PlanRepositoryError> {
         let id_value = id.get_value();
-        let result = self.in_memory_repository.write_plans
+        let result = self
+            .in_memory_repository
+            .write_plans
             .read()
-            .map_err(|e| { PlanRepositoryError::GetByIdError(e.to_string()) })?;
+            .map_err(|e| PlanRepositoryError::GetByIdError(e.to_string()))?;
         match result.get(id_value) {
-            Some(plan_model) => { Ok(Some(self.plan_model_to_entity(id_value, plan_model))) }
+            Some(plan_model) => Ok(Some(self.plan_model_to_entity(id_value, plan_model))),
             None => Ok(None),
         }
     }
 
     async fn save(&self, plan: &Plan) -> Result<(), PlanRepositoryError> {
-        self.in_memory_repository.write_plans
+        self.in_memory_repository
+            .write_plans
             .write()
-            .map_err(|e| { PlanRepositoryError::SaveError(e.to_string()) })?
+            .map_err(|e| PlanRepositoryError::SaveError(e.to_string()))?
             .insert(plan.get_id().to_string(), self.plan_to_model(plan));
 
         let todo_models: Vec<TodoWriteModel> = plan
@@ -106,9 +117,10 @@ impl PlanRepository for InMemoryPlanRepository {
             .map(|todo| self.todo_to_model(plan.get_id(), todo))
             .collect();
 
-        self.in_memory_repository.write_todos
+        self.in_memory_repository
+            .write_todos
             .write()
-            .map_err(|e| { PlanRepositoryError::SaveError(e.to_string()) })?
+            .map_err(|e| PlanRepositoryError::SaveError(e.to_string()))?
             .insert(plan.get_id().to_string(), todo_models);
         self.in_memory_repository.sync_read_plans(plan);
         Ok(())

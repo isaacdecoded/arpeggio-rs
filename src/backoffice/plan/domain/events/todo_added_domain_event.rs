@@ -1,9 +1,9 @@
-use std::any::Any;
-use std::time::SystemTime;
 use crate::{
     backoffice::plan::domain::entities::todo::Todo,
-    core::domain::{ events::domain_event::DomainEvent, models::entity::Entity },
+    core::domain::{events::domain_event::DomainEvent, models::entity::Entity},
 };
+use std::any::Any;
+use std::time::SystemTime;
 
 #[derive(Clone)]
 pub struct TodoAddedDomainEvent {

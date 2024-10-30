@@ -1,14 +1,11 @@
-use std::time::SystemTime;
+use crate::backoffice::plan::domain::{
+    enums::todo_status::TodoStatus, value_objects::todo_description::TodoDescription,
+};
 use crate::core::domain::models::{
-    entity::Entity,
-    identity_object::IdentityObject,
-    date_value_object::DateValueObject,
+    date_value_object::DateValueObject, entity::Entity, identity_object::IdentityObject,
     value_object::ValueObject,
 };
-use crate::backoffice::plan::domain::{
-    value_objects::todo_description::TodoDescription,
-    enums::todo_status::TodoStatus,
-};
+use std::time::SystemTime;
 
 pub struct CreateTodoProps {
     pub id: IdentityObject,

@@ -1,13 +1,13 @@
-use async_trait::async_trait;
-use std::sync::Arc;
+use super::in_memory_repository::InMemoryRepository;
 use crate::{
     backoffice::plan::{
-        application::queries::get_plan_use_case::{ GetPlanReadModel, PlanTodoReadModel },
-        domain::repositories::get_plan_repository::{ GetPlanRepository, GetPlanRepositoryError },
+        application::queries::get_plan_use_case::{GetPlanReadModel, PlanTodoReadModel},
+        domain::repositories::get_plan_repository::{GetPlanRepository, GetPlanRepositoryError},
     },
-    core::domain::models::{ identity_object::IdentityObject, value_object::ValueObject },
+    core::domain::models::{identity_object::IdentityObject, value_object::ValueObject},
 };
-use super::in_memory_repository::InMemoryRepository;
+use async_trait::async_trait;
+use std::sync::Arc;
 
 pub struct InMemoryGetPlanRepository {
     in_memory_repository: Arc<InMemoryRepository>,
@@ -15,7 +15,9 @@ pub struct InMemoryGetPlanRepository {
 
 impl InMemoryGetPlanRepository {
     pub fn new(in_memory_repository: Arc<InMemoryRepository>) -> Self {
-        Self { in_memory_repository }
+        Self {
+            in_memory_repository,
+        }
     }
 }
 
@@ -23,34 +25,33 @@ impl InMemoryGetPlanRepository {
 impl GetPlanRepository<GetPlanReadModel> for InMemoryGetPlanRepository {
     async fn get_by_id(
         &self,
-        id: &IdentityObject
+        id: &IdentityObject,
     ) -> Result<Option<GetPlanReadModel>, GetPlanRepositoryError> {
         let id_value = id.get_value();
-        let result = self.in_memory_repository.read_plans
+        let result = self
+            .in_memory_repository
+            .read_plans
             .read()
             .map_err(|e| GetPlanRepositoryError::GetByIdError(e.to_string()))?;
         match result.get(id_value) {
             Some(plan_model) => {
-                let todos = plan_model.todos
+                let todos = plan_model
+                    .todos
                     .iter()
-                    .map(|todo| {
-                        PlanTodoReadModel {
-                            id: todo.id.to_string(),
-                            status: todo.status.to_string(),
-                            description: todo.description.to_string(),
-                            created_at: todo.created_at,
-                            updated_at: todo.updated_at,
-                        }
+                    .map(|todo| PlanTodoReadModel {
+                        id: todo.id.to_string(),
+                        status: todo.status.to_string(),
+                        description: todo.description.to_string(),
+                        created_at: todo.created_at,
+                        updated_at: todo.updated_at,
                     })
                     .collect();
-                Ok(
-                    Some(GetPlanReadModel {
-                        name: plan_model.name.to_string(),
-                        todos,
-                        created_at: plan_model.created_at,
-                        updated_at: plan_model.updated_at,
-                    })
-                )
+                Ok(Some(GetPlanReadModel {
+                    name: plan_model.name.to_string(),
+                    todos,
+                    created_at: plan_model.created_at,
+                    updated_at: plan_model.updated_at,
+                }))
             }
             None => Ok(None),
         }

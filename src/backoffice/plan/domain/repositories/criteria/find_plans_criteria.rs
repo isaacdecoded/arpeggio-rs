@@ -1,4 +1,4 @@
-use crate::core::domain::repositories::criteria::{ Criteria, Filter, Sort };
+use crate::core::domain::repositories::criteria::{Criteria, Filter, Sort};
 
 pub enum PlanFieldEnum {
     Name,
