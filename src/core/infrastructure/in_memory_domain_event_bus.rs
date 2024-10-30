@@ -1,11 +1,10 @@
-use async_trait::async_trait;
-use std::error::Error;
 use crate::core::domain::events::{
-    domain_event::DomainEvent,
-    domain_event_bus::DomainEventBus,
+    domain_event::DomainEvent, domain_event_bus::DomainEventBus,
     domain_event_subscriber::DomainEventSubscriber,
 };
+use async_trait::async_trait;
 use std::collections::HashMap;
+use std::error::Error;
 
 #[derive(Default)]
 pub struct InMemoryDomainEventBus {
@@ -16,7 +15,7 @@ pub struct InMemoryDomainEventBus {
 impl DomainEventBus for InMemoryDomainEventBus {
     async fn publish(
         &self,
-        domain_events: Vec<Box<dyn DomainEvent>>
+        domain_events: Vec<Box<dyn DomainEvent>>,
     ) -> Result<(), Box<dyn Error + Send + Sync>> {
         for domain_event in domain_events.iter() {
             if let Some(subscribers) = self.subscribers.get(&domain_event.get_name()) {
@@ -30,7 +29,7 @@ impl DomainEventBus for InMemoryDomainEventBus {
 
     async fn add_subscribers(
         &mut self,
-        subscribers: Vec<Box<dyn DomainEventSubscriber>>
+        subscribers: Vec<Box<dyn DomainEventSubscriber>>,
     ) -> Result<(), Box<dyn Error>> {
         for subscriber in subscribers {
             let subscriber_domain_event_name = subscriber.subscribed_to();
@@ -38,7 +37,8 @@ impl DomainEventBus for InMemoryDomainEventBus {
                 subscribers.push(subscriber);
             } else {
                 let subscribers = vec![subscriber];
-                self.subscribers.insert(subscriber_domain_event_name, subscribers);
+                self.subscribers
+                    .insert(subscriber_domain_event_name, subscribers);
             }
         }
         Ok(())
@@ -47,17 +47,16 @@ impl DomainEventBus for InMemoryDomainEventBus {
 
 #[cfg(test)]
 mod tests {
-    use std::error::Error;
-    use async_trait::async_trait;
-    use std::{ any::Any, time::SystemTime };
     use crate::core::{
         domain::events::{
-            domain_event_bus::DomainEventBus,
-            domain_event::DomainEvent,
+            domain_event::DomainEvent, domain_event_bus::DomainEventBus,
             domain_event_subscriber::DomainEventSubscriber,
         },
         infrastructure::in_memory_domain_event_bus::InMemoryDomainEventBus,
     };
+    use async_trait::async_trait;
+    use std::error::Error;
+    use std::{any::Any, time::SystemTime};
 
     struct TestSubscriber;
     struct TestDomainEvent {
@@ -88,7 +87,7 @@ mod tests {
 
         async fn on(
             &self,
-            _domain_event: &dyn DomainEvent
+            _domain_event: &dyn DomainEvent,
         ) -> Result<(), Box<dyn Error + Send + Sync>> {
             Ok(())
         }
@@ -117,9 +116,9 @@ mod tests {
         let mut in_memory_domain_event_bus = InMemoryDomainEventBus::default();
         let subscriber = TestSubscriber::new();
         let domain_events: Vec<Box<dyn DomainEvent>> = vec![Box::new(TestDomainEvent::new())];
-        let add_subscriber_result = in_memory_domain_event_bus.add_subscribers(
-            vec![Box::new(subscriber)]
-        ).await;
+        let add_subscriber_result = in_memory_domain_event_bus
+            .add_subscribers(vec![Box::new(subscriber)])
+            .await;
         let publish_result = in_memory_domain_event_bus.publish(domain_events).await;
         assert!(add_subscriber_result.is_ok());
         assert!(publish_result.is_ok());

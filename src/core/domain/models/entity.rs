@@ -1,5 +1,5 @@
-use std::time::SystemTime;
 use crate::core::domain::models::value_object::ValueObject;
+use std::time::SystemTime;
 
 pub trait Entity<Id: ValueObject<String>> {
     fn get_id(&self) -> &Id;

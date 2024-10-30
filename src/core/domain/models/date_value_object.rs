@@ -1,5 +1,5 @@
-use std::{ error::Error, time::SystemTime };
 use crate::core::domain::models::value_object::ValueObject;
+use std::{error::Error, time::SystemTime};
 
 #[derive(Copy, Clone, PartialEq)]
 pub struct DateValueObject {
@@ -28,11 +28,10 @@ impl DateValueObject {
 
 #[cfg(test)]
 mod tests {
-    use std::time::SystemTime;
     use crate::core::domain::models::{
-        value_object::ValueObject,
-        date_value_object::DateValueObject,
+        date_value_object::DateValueObject, value_object::ValueObject,
     };
+    use std::time::SystemTime;
 
     #[test]
     fn should_initialize_valid_instance() {
